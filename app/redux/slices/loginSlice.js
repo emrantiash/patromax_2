@@ -1,20 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Endpoint from "../../utils/path/Path";
-import { post } from "../../utils/query/Query";
+import { post,noHeaderpost } from "../../utils/query/Query";
 
-export const getLogin = createAsyncThunk('login', async (data) => {
 
+export const getLogin = createAsyncThunk('get-login', async (data) => {
+  console.log("==action===",data)
   try {
-    const response = await post(Endpoint.login, data)
+    const response = await noHeaderpost(Endpoint.login, data)
     return response.data
   }
   catch (error) {
     return error.response.data
   }
 
-}
+})
 
-)
+
 
 const initialStateValues = {
   login: false,
@@ -48,13 +50,14 @@ export const loginSlice = createSlice({
 
     builder.addCase(getLogin.fulfilled, (state, action) => {
       state.isLoading = false; // Loading finished
-      state.login = Boolean(action.payload.key_details?.api_key); // Set login status
-      state.data = action.payload;
+      state.login = true; // Set login status
+      state.data = action.payload.user_details;
       const { api_key, api_secret } = action.payload.key_details || {};
       const token = `${api_key}:${api_secret}`; // Set token
       state.token = token;
+      // localStorage.setItem("SECRET_KEY", data);
 
-      // setLocalStorage(token);
+      setLocalStorage(token);
     });
 
     builder.addCase(getLogin.rejected, (state) => {
@@ -73,3 +76,9 @@ export const loginSlice = createSlice({
 export const { signIn , signout, setLanguage } = loginSlice.actions
 
 export default loginSlice.reducer
+
+function setLocalStorage(data) {
+  // const encryptedData = CryptoJS.AES.encrypt(data, SECRET_KEY).toString();
+  // localStorage.setItem("SECRET_KEY", data);
+  AsyncStorage.setItem("SECRET_KEY", data)
+}

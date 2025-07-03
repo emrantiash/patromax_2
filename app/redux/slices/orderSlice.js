@@ -9,7 +9,8 @@ const initialStateValues = {
   isLoading: false,
   data: {},
   isError: false,
-  msg : "Network Error"
+  msg : "Network Error",
+  active : []
 }
 
 export const orderSlice = createSlice({
@@ -18,6 +19,10 @@ export const orderSlice = createSlice({
   reducers: {
     storeOrder: (state, action) => {
       state.data = action.payload
+    },
+    // temporary 
+    activeOrder : (state,action) =>{
+      state.active = action.payload //[...state.active,action.payload]
     }
   },
   
@@ -25,6 +30,6 @@ export const orderSlice = createSlice({
 
 
 
-export const { storeOrder } = orderSlice.actions
+export const { storeOrder,activeOrder } = orderSlice.actions
 
 export default orderSlice.reducer

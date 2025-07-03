@@ -23,7 +23,9 @@ export default function ButtonBox({
   borderRadius,
   isClassName,
   className,
-  isIcon
+  isIcon,
+  iconsize,
+  fontColor
 }) {
   return (
     <View>
@@ -48,6 +50,7 @@ export default function ButtonBox({
         {
           isIcon && 
           <ButtonIcon
+          size={iconsize}
           as={icon}
           className="ml-2"
           color={color}
@@ -59,7 +62,9 @@ export default function ButtonBox({
           className="text-typography-600"
           style={{
             justifyContent: "center",
-            alignItems : 'center'
+            alignItems : 'center',
+            color : fontColor,
+            letterSpacing : 0.5
           }}
         >{text}</ButtonText>
         

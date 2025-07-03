@@ -12,7 +12,6 @@ import {
   removeItem,
   positiveSignCalled,
   negativeSignCalled,
-  makeCompareZero,
   storeData,
   storeTotal,
 } from "../../../redux/slices/cartSlice";
@@ -25,66 +24,39 @@ import {
   Repeat1Icon,
   Icon,
   EyeIcon,
+  Image,
 } from "@gluestack-ui/themed";
-import { storeOrder, activeOrder } from "../../../redux/slices/orderSlice";
 import { storeProduct } from "../../../redux/slices/productSlice";
+import { storeOrder, activeOrder } from "../../../redux/slices/orderSlice";
 import ImageItem from "../../../component/image/ImageItem";
 import ButtonBox from "../../../component/button/Button";
 import InputBox from "../../../component/input/Input";
 import { Redirect, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { getMyCart } from "../../../redux/slices/cartSlice";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 import _data from "../home/data";
 import { getLocales } from "expo-localization";
 import { i18n } from "../../../utils/libs/localization/Localization";
+import Exclusive from "../../../pages/exclusive/Exclusive";
 
 export default function index() {
   const dispatch = useDispatch();
   const _language = useSelector((state) => state.loginReducer.language);
   const _mydata = useSelector((state) => state.cartReducer.data);
-  const compare = useSelector((state) => state.cartReducer.compare);
-  const [data, setData] = useState(
-    useSelector((state) => state.cartReducer.data)
-  ); //useState(_data);
+  const [data, setData] = useState(_data);
   const [myData, setMyData] = useState([]);
   const [total, setTotal] = useState(0.0);
-
-  console.log("===compare data is ====" + JSON.stringify(compare));
+  const _image =
+    "https://petromax-test.s3.ap-south-1.amazonaws.com/petromax-7-04062025.png";
 
   i18n.locale = getLocales()[_language].languageCode;
 
-  useEffect(() => {
-    data == undefined && dispatch(getMyCart());
-  }, [data == undefined]);
+  // console.log(i18n.t('Total'));
 
   useEffect(() => {
-    _mydata.map((__data, index) => {
-      console.log(__data.id);
-      if (__data.id == compare?.id) {
-        const item = __data;
-        const updatedItem = {
-          ...compare,
-          quantity: parseInt(compare.quantity) + parseInt(__data.quantity),
-          price: parseInt(compare.basePrice) * parseInt(compare.quantity),
-        };
-
-        // console.log("==updated item=="+JSON.stringify(updatedItem))
-        const newState = [..._mydata];
-
-        newState.splice(_mydata.indexOf(item), 1, updatedItem);
-        // console.log("==" + JSON.stringify(newState));
-        setData(newState);
-      }
-    });
-  }, [compare]);
-
-  // console.log("database"+JSON.stringify(data))
-
-  // useEffect(() => {
-  //   <Redirect href="screen/cart/Cart" />;
-  // });
+    <Redirect href="screen/cart/Cart" />;
+  });
 
   useEffect(() => {
     let total = 0.0;
@@ -116,7 +88,7 @@ export default function index() {
 
   useEffect(() => {
     dispatch(storeData(data));
-    // setData(data);
+    setData(data);
   }, [data]);
 
   const negetiveCalled = (thisItem) => {
@@ -203,8 +175,7 @@ export default function index() {
   };
 
   const itemSelected = (item) => {
-    // setData()
-    console.log(item);
+    console.log("called");
     dispatch(storeProduct(item));
     router.push("screen/productDetails/ProductDetails");
   };
@@ -212,33 +183,33 @@ export default function index() {
   return (
     <>
       <View style={styles.container}>
+       {/* <Exclusive /> */}
+
         <FlatList
           ListEmptyComponent={renderNoStateMessage}
-          data={data}
+          ListHeaderComponent={()=><View
+          style={{
+            marginTop :  10 
+          }}
+          ><Exclusive /></View>}
+         data={data}
           renderItem={({ item }) => (
             <Card style={styles.mycart}>
               <LinearGradient
-                colors={["#f9f9f9", "#fff"]}
+                //   colors={["#f9f9f9", "#fff"]}
+                colors={["#fff", "#fff"]}
                 start={{ x: 0.2, y: 0.8 }}
                 end={{ x: 0.2, y: 0.4 }}
                 style={styles.background}
               >
-                <View style={styles.header}>
+                <TouchableOpacity
+                  style={styles.header}
+                  onPress={() => itemSelected(item)}
+                >
                   <View style={styles.leftSide}>
-                    <TouchableOpacity
-                      style={styles.image}
-                      onPress={() => itemSelected(item)}
-                    >
+                    <View style={styles.image}>
                       <ImageItem src={item?.image} size="lg" borderWidth={0} />
-                    </TouchableOpacity>
-
-                    {/* <View>
-                      <Text size="md" style={styles.spacing}>
-                        {item?.name}
-                      </Text>
-                      <Text size="sm">Capacity : {item?.capacity}</Text>
-                      <Text size="sm">${item?.basePrice}</Text>
-                    </View> */}
+                    </View>
                   </View>
                   <View style={styles.rightSide}>
                     <View>
@@ -260,80 +231,45 @@ export default function index() {
                         alignItems: "center",
                       }}
                     >
-                      <ButtonBox
-                        isIcon={true}
-                        text=""
-                        action="default"
-                        width={(width * 10) / 100}
-                        size="xs"
-                        icon={RemoveIcon}
-                        onClick={() => negetiveCalled(item)}
-                        color="green"
-                      />
-                      <InputBox
-                        isReadOnly={true}
-                        size="md"
-                        isnumber={true}
-                        width={30}
-                        height={20}
-                        value={item?.quantity?.toString()}
-                        fontSize={10}
-                        color="green"
-                      />
-                      <ButtonBox
-                        isIcon={true}
-                        text=""
-                        action="default"
-                        width={(width * 10) / 100}
-                        size="xs"
-                        icon={AddIcon}
-                        onClick={() => positiveCalled(item)}
-                        color="green"
-                      />
+                      {/* <ButtonBox
+                          isIcon={true}
+                          text=""
+                          action="default"
+                          width={(width * 5) / 100}
+                          size="xs"
+                          icon={RemoveIcon}
+                          onClick={() => negetiveCalled(item)}
+                          color="green"
+                        />
+                        <InputBox
+                          isReadOnly={true}
+                          size="md"
+                          isnumber={true}
+                          width={30}
+                          height={20}
+                          value={item?.quantity?.toString()}
+                          fontSize={10}
+                          color="green"
+                        />
+                        <ButtonBox
+                          isIcon={true}
+                          text=""
+                          action="default"
+                          width={(width * 10) / 100}
+                          size="xs"
+                          icon={AddIcon}
+                          onClick={() => positiveCalled(item)}
+                          color="green"
+                        /> */}
                     </View>
                   </View>
-                </View>
+                </TouchableOpacity>
               </LinearGradient>
             </Card>
           )}
           keyExtractor={(item) => item?.id}
           ListFooterComponent={() => <Text></Text>}
         />
-      </View>
-      <View>
-        <Card>
-          <View style={styles.summery}>
-            <Text size="md" style={styles.total}>
-              {i18n.t("Total")} : Tk: {total}
-            </Text>
-            <View>
-              <ButtonBox
-                action="negative"
-                text={i18n.t("Proceed")}
-                width={(width * 35) / 100}
-                borderRadius={10}
-                onClick={confirmedCalled}
-                fontColor={"#fff"}
-              />
-            </View>
-          </View>
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "flex-end",
-            }}
-          >
-            <ButtonBox
-              variant={"outline"}
-              action="secondary"
-              text="Proceed without payment"
-              width={(width * 80) / 100}
-              borderRadius={10}
-              onClick={withoutPayment}
-              fontColor={"green"}
-            />
-          </View>
-        </Card>
       </View>
     </>
   );
@@ -345,6 +281,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+   
   },
   containerImage: {
     // flex: 1,
@@ -365,9 +302,11 @@ const styles = StyleSheet.create({
     // alignItems: 'center',
     borderRadius: 8,
     borderWidth: 1,
+    backgroundColor: "#fff",
     borderColor: "#e8f7f1",
   },
   mycart: {
+    marginTop : 10,
     marginVertical: 5,
     marginHorizontal: 10,
     justifyContent: "flex-start",
@@ -376,7 +315,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    // backgroundColor : 'red',
+    backgroundColor: "#fff",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",

@@ -1,11 +1,11 @@
 import axios from "axios";
-// import Network from "../network/Network";
+import Network from "../network/Network";
+import { useSelector } from "react-redux";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function getHeaderFunction() {
-  // const SECRET_KEY = import.meta.env.VITE_SERVER_TOKEN_KEY;
-
   try {
-    const encryptedToken = localStorage.getItem("SECRET_KEY");
+    const encryptedToken = AsyncStorage.getItem("SECRET_KEY");
     if (!encryptedToken) {
       throw new Error("No token found in localStorage");
     }
@@ -24,7 +24,6 @@ export default function getHeaderFunction() {
 // Function for form data headers
 export function getHeaderFunctionFormData() {
   // const SECRET_KEY = import.meta.env.VITE_SERVER_TOKEN_KEY;
-
   try {
     const encryptedToken = localStorage.getItem(SECRET_KEY);
     if (!encryptedToken) {
@@ -39,7 +38,6 @@ export function getHeaderFunctionFormData() {
 
 export function get(end) {
   const headers = getHeaderFunction();
-  // (Network.network + end, { headers });
   return axios.get(Network.network + end, { headers });
 }
 
@@ -63,20 +61,18 @@ export function customgetv2(end, data) {
 export function noHeaderpost(end, data) {
   // const con = useConfig()
   // const headers = getHeaderFunction();
-  //  (Network.network + end, data, { headers });
+  console.log(Network.network + end, data);
   return axios.post(Network.network + end, data);
 }
 
 export function post(end, data) {
-  // const con = useConfig()
   const headers = getHeaderFunction();
-
+  console.log(Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 
 export function customPost(end, data) {
   const headers = getHeaderFunctionFormData();
-
   return axios.post(Network.network + end, data, { headers });
 }
 

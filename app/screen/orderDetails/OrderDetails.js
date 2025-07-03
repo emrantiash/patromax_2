@@ -1,4 +1,4 @@
-import { ScrollView,View, StyleSheet, DimensionValue, Dimensions } from "react-native";
+import { ScrollView,View, StyleSheet, DimensionValue, Dimensions,TouchableOpacity } from "react-native";
 import React from "react";
 import { useSelector } from "react-redux";
 import {
@@ -11,6 +11,9 @@ import {
 import Fontisto from "@expo/vector-icons/Fontisto";
 import Entypo from '@expo/vector-icons/Entypo';
 import BadgeSymbol from "../../component/badge/Badge";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { router } from "expo-router";
+
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
@@ -19,9 +22,14 @@ const width = Dimensions.get("window").width;
 export default function OrderDetails() {
   const data = useSelector((state)=>state.orderReducer.data)
   // console.log("====data====="+data.date)
+
+  const makeCallPayment =()=>{
+    router.push("screen/uploadScreen/UploadScreen")
+  }
   return (
-    <ScrollView style={styles.container}>
-      <Card style={styles.body} variant="ghost">
+    <>
+    <View style={styles.container}>
+      <Card style={styles.body} variant="elevated">
         <View style={styles.header}>
           <View style={styles.headerColumn}>
             <Text size="lg" style={styles.letter}>
@@ -36,7 +44,7 @@ export default function OrderDetails() {
           </View>
         </View>
       </Card>
-      <Card style={styles.body} variant="ghost">
+      <Card style={styles.body} variant="elevated">
         {/* <View > */}
           <View style={styles.headerColumn2}>
             <Text size="lg" style={[styles.letterHead,styles.letter]}>
@@ -72,7 +80,7 @@ export default function OrderDetails() {
                 }}>
                 <Entypo name="dot-single" size={15} color="green" /> {data.name} | {data.capacity}
                 </Text>
-                <Text size="sm">(QTY){data.qty}</Text>
+                <Text size="sm">(QTY){data.qty || data.quantity}</Text>
                 <Text size="sm">{data.price} Tk</Text>
               </View>
             ))}
@@ -99,8 +107,8 @@ export default function OrderDetails() {
           </View>
         </View>
       </Card>
-      <Card>
-        <View>
+      <Card style={styles.body} variant="elevated">
+        <View >
           <Text size="sm" style={[styles.letter ,styles.shipping]}>Shipping Info</Text>
         </View>
         <View style={styles.dateBody}>
@@ -108,26 +116,53 @@ export default function OrderDetails() {
           <Text size="sm" bold>Contact : 01765667656</Text>
         </View>
       </Card>
+      
       {/* <Card>
 
       </Card> */}
-    </ScrollView>
+    </View>
+    <Card>
+    <View style={styles.footer}>
+      {
+        data.status =="Paid" ?
+        <View>
+          <Text size="sm"  color="red">Contact Support 
+      <AntDesign name="arrowright" size={12} color="red" />
+      </Text>
+        </View> :
+         <TouchableOpacity onPress={
+         makeCallPayment
+         }>
+         <Text size="sm"  color="red">Payment 
+     <AntDesign name="arrowright" size={12} color="red" />
+     </Text>
+       </TouchableOpacity>
+      }
+      
+    </View>
+  </Card>
+  </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // backgroundColor : '#fff'
+    backgroundColor : '#fff'
   },
   body: {
     backgroundColor: "#fff",
-    marginVertical: 8,
+    marginVertical: 5,
   },
   dateBody : {
     height : (height * 6) /100 ,
     // backgroundColor : 'red',
     justifyContent : 'space-between'
+  },
+  footer : {
+    // backgroundColor : 'red',
+    justifyContent : 'flex-end',
+    alignItems : 'center'
   },
   letterHead : {
     marginVertical : (height * 1.5) /100 

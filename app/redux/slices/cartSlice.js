@@ -1,22 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // import { act } from "react";
 // import { items } from "../../(drawer)/(tabs)/home/index#";
-// import Endpoint from '../../utils/path/Path';
-// import { post } from '@/app/utils/query/Query';
+import Endpoint from '../../utils/path/Path';
+import { get , post } from "../../utils/query/Query";
 
-// export const marchantLogin = createAsyncThunk('login', async (data) => {
+export const getMyCart = createAsyncThunk('login', async () => {
 
-//   try {
-//     const response = await post(Endpoint.marchantLogin, data)
-//     return response.data
-//   }
-//   catch (error) {
-//     return error.response.data
-//   }
+  try {
+    const response = await get(Endpoint.cart)
+    return response.data
+  }
+  catch (error) {
+    return error.response.data
+  }
 
-// }
+}
 
-// )
+)
 
 const initialStateValues = {
   login: false,
@@ -26,18 +26,32 @@ const initialStateValues = {
   isError: false,
   token: "",
   msg: "Network Error",
-  total : 0.0
+  total : 0.0,
+  compare : {}
 };
 
 export const cartSlice = createSlice({
   name: "cart",
   initialState: initialStateValues,
   reducers: {
+    setDataStore : (state,action) =>{
+      state.data = action.payload
+    },
     addToCart: (state, action) => {
     //  state.data = state.data ?  [...state.data,action.payload] : [action.payload]
     state.data = state.data ? getMyCode(state.data,action.payload) : [action.payload]
       // state.data = getMyCode(state.data, action.payload);
     },
+    addToCompare: (state, action) => {
+      //  state.data = state.data ?  [...state.data,action.payload] : [action.payload]
+      state.compare = action.payload
+        // state.data = getMyCode(state.data, action.payload);
+      },
+    makeCompareZero : (state, action) => {
+        //  state.data = state.data ?  [...state.data,action.payload] : [action.payload]
+        state.compare = {}
+          // state.data = getMyCode(state.data, action.payload);
+        },
     removeItem: (state, action) => {
       state.data = state.data.filter((item) => item.id !== action.payload.id);
     },
@@ -75,12 +89,29 @@ export const cartSlice = createSlice({
       ];
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(getMyCart.pending, (state) => {
+      state.isLoading = true; // Set loading state
+    });
+
+    builder.addCase(getMyCart.fulfilled, (state, action) => {
+      state.isLoading = false; // Loading finished
+      state.data = action.payload.message
+    });
+
+    builder.addCase(getMyCart.rejected, (state) => {
+      state.login = false; // Reset login status
+      state.isError = true; // Indicate an error
+      state.isLoading = false; // Loading finished
+      state.errorMsg = "Network Error"; // Set error message
+    });
+  },
 });
 
 // Action creators are generated for each case reducer function
 // export const { setlogin } = loginSlice.actions
 
-export const {storeTotal,addToCart,removeItem,storeData,positiveSignCalled,negativeSignCalled} = cartSlice.actions;
+export const {setDataStore,storeTotal,addToCart,removeItem,storeData,addToCompare,makeCompareZero,positiveSignCalled,negativeSignCalled} = cartSlice.actions;
 
 export default cartSlice.reducer;
 

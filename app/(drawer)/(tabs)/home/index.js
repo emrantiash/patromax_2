@@ -1,75 +1,239 @@
-import { View, StyleSheet,FlatList } from 'react-native'
-import React from 'react'
-import { useSelector } from 'react-redux';
-import { Card,Text } from "@gluestack-ui/themed";
-import Active from '../../../pages/active/Active';
-import { LinearGradient } from 'expo-linear-gradient';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import {items,past_items} from '../../data'
-import { getLocales } from 'expo-localization';
-import { i18n } from "../../../utils/libs/localization/Localization";
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  TouchableHighlight,
+  TouchableOpacity,
+  StatusBar,
+  Platform
+} from "react-native";
+import React from "react";
+import { Card, Text } from "@gluestack-ui/themed";
+import { BarChart } from "react-native-gifted-charts";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from "expo-router";
+import useConfig from "../../../lib/hook/config";
 
+const height = Dimensions.get("window").height;
+const width = Dimensions.get("window").width;
+const barData = [
+  {
+    value: 250,
+    label: "Week 1",
+    frontColor: "#DF2B2A",
+    //   topLabelComponent: () => (
+    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>50</Text>
+    //   ),
+  },
+  {
+    value: 500,
+    label: "Week 2",
+    frontColor: "#DF2B2A",
+    sideColor: "#23A7F3",
+    topColor: "#92e6f6",
+    // topLabelComponent: () => (
+    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>560</Text>
+    //   ),
+  },
+  {
+    value: 745,
+    label: "Week 3",
+    frontColor: "#DF2B2A",
+    //   topLabelComponent: () => (
+    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>100</Text>
+    //   ),
+  },
+  {
+    value: 320,
+    label: "Week 4",
+    frontColor: "#DF2B2A",
+    //   topLabelComponent: () => (
+    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>50</Text>
+    //   ),
+  },
+  //   {value: 600, label: 'F', frontColor: '#177AD5'},
+  //   {value: 256, label: 'S'},
+  //   {value: 300, label: 'S'},
+];
 
-export default function Page() {
-  const _language = useSelector((state)=>state.loginReducer.language) ;
-  i18n.locale = getLocales()[_language].languageCode
+export default function index() {
+  const config = useConfig()
+  const shift_active = () => {
+    router.push("screen/activeScreen/ActiveScreen");
+  };
   return (
-    <View style={styles.container}>
-      
-        <FlatList
-        data={items}
-        renderItem={({item}) => <Active 
-        order={item.order}
-        total={item.total}
-        items={item.items}
-        status={item.status} 
-        date={item.date}
-        dataset={item}
-        />}
-        keyExtractor={item => item.id}
-        ListHeaderComponent = {() => (
-          <Text style={styles.text}>{i18n.t('Active')} {i18n.t('Orders')}</Text>
-      )}
-      />
-       <FlatList
-        data={past_items}
-        renderItem={({item}) => <Active 
-        order={item.order}
-        total={item.total}
-        items={item.items}
-        status={item.status} 
-        date={item.date}
-        dataset={item}
-        />}
-        keyExtractor={item => item.id}
-        ListHeaderComponent = {() => (
-          <Text style={styles.text}>{i18n.t('Past')} {i18n.t('Orders')}</Text>
-      )}
-      />
-      
-        
-    </View>
-  )
+    <ScrollView contentContainerStyle={styles.conatiner}>
+      <StatusBar backgroundColor="#DF2B2A" color="#fff" translucent={true} barStyle="light-content" />
+      <Card style={styles.headerTop}>
+        <View style={styles.upperCard}>
+          <Text size="lg" bold>
+            Good Afternoon, {config[1]?.first_name} !
+          </Text>
+          <Text size="sm">Here's what you need to know today</Text>
+        </View>
+        <View style={styles.upperCard}>
+          <View style={styles.upperInside}>
+            <Text size="lg" bold>
+              Total Purchase
+            </Text>
+            <Text size="lg" bold>
+              June 2015
+            </Text>
+          </View>
+
+          <Text size="sm">Tk: 17000</Text>
+        </View>
+      </Card>
+      <Card style={styles.header}>
+        <BarChart
+        // xAxisTextNumberOfLines = {2}
+          backgroundColor={"#fff"}
+          showLine
+          // isThreeD
+          side="right"
+          isAnimated
+          width={width}
+          barWidth={width / 7}
+          noOfSections={4}
+          barBorderRadius={4}
+          frontColor="lightgray"
+          data={barData}
+          yAxisThickness={0}
+          xAxisThickness={0}
+        />
+      </Card>
+      <Card style={styles.headerLower}>
+        <View style={styles.headerLowerInside}>
+          <Card
+            size="lg"
+            variant="outline"
+            style={{
+              width: (width * 45) / 100,
+            }}
+          >
+            <View style={styles.lowerInsideFirst}>
+              <View>
+                <Text size="md">Total Orders</Text>
+              </View>
+
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View
+                  style={{
+                    marginHorizontal: 5,
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <Text size="4xl">23</Text>
+                </View>
+                <View>
+                  <Text> </Text>
+                </View>
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "flex-end",
+                    flexDirection: "column",
+                  }}
+                >
+                  <View>
+                    <Text size="lf" color="green">
+                      +12.4 %<Text> </Text>
+                      <SimpleLineIcons name="graph" size={14} color="green" />
+                    </Text>
+                  </View>
+                  <View>
+                    <Text size="2xs">since last month</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Card>
+          <Card
+            size="lg"
+            variant="outline"
+            // className="m-3"
+            style={{
+              width: (width * 45) / 100,
+            }}
+          >
+            <TouchableOpacity 
+            onPress={shift_active}>
+              <View style={{
+                flexDirection : 'row',
+                justifyContent : 'space-between',
+                alignItems : 'center'
+              }}>
+                <Text size="md">Total Orders</Text>
+                <MaterialIcons name="arrow-forward-ios" size={15} color="black" />
+              </View>
+              <View
+                style={{
+                  marginHorizontal: 5,
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Text size="4xl">01 </Text>
+              </View>
+            </TouchableOpacity>
+          </Card>
+        </View>
+      </Card>
+    </ScrollView>
+  );
 }
 
 const styles = StyleSheet.create({
-    container : {
-        // flex : 1 ,
-        backgroundColor : '#f8f8f8'
-    },
-    button: {
-      flexDirection : 'row',
-      justifyContent : 'space-between',
-      padding: 15,
-      // alignItems: 'center',
-      borderRadius: 5,
-    },
-    text: {
-      // backgroundColor: 'transparent',
-      // fontSize: 15,
-      // color: '#000',
-      paddingHorizontal : 20,
-      paddingTop : 20 ,
-      letterSpacing : 1.0
-    },
-})
+  conatiner: {
+    backgroundColor: "white",
+    width: "100%",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerTop: {
+    height: (height * 22) / 100,
+    width: width,
+    justifyContent: "space-between",
+    // marginVertical  :  20
+  },
+  header: {
+    height: (height * 30) / 100,
+    // marginTop : 10 ,
+    width: width,
+    // marginVertical  :  20
+  },
+  upperCard: {
+    flexDirection: "column",
+    marginVertical: Platform.OS==="ios" ? 20 : 5,
+    // paddingVertical: Platform.OS=="android" ? 5 : 10,
+    // marginVertical :  20
+    // justifyContent : ''
+  },
+  upperInside: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  headerLower: {
+    height: (height * 33) / 100,
+    width: "100%",
+    justifyContent: "center",
+  },
+  headerLowerInside: {
+    // backgroundColor : 'yellow',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    // alignItems : 'center'
+  },
+  lowerInsideFirst: {
+    // backgroundColor : 'red',
+    height: 70,
+    justifyContent: "space-between",
+  },
+});

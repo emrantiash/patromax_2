@@ -22,6 +22,8 @@ const _variant = "elevated";
 export default function Active({status,order,total,items,date,dataset }) {
   const dispatch = useDispatch()
   const makeTheCall =(data) =>{
+
+    // console.log(data)
     dispatch(storeOrder(data))
     router.push("screen/orderDetails/OrderDetails")
   }
@@ -35,6 +37,7 @@ export default function Active({status,order,total,items,date,dataset }) {
          // className="m-3"
         style={styles.body}
       >
+        <Card>
         <LinearGradient colors={[ '#fff' , '#fff']}
         // '#e8f7f1','#fff4f2',#e5e4d2
         
@@ -59,12 +62,13 @@ export default function Active({status,order,total,items,date,dataset }) {
           <Octicons name="dot" size={12} color="green" />  {data.name} | {data.capacity}
           </Text>
           <Text size="sm" sub >
-            (Qty) {data.qty}
+            (Qty) {data.qty || data.quantity} 
           </Text>
         </View>
           )
         }
          </LinearGradient>
+         </Card>
          <Card>
          <View style={[styles.innerBody]}>
           <View style={{
@@ -72,7 +76,7 @@ export default function Active({status,order,total,items,date,dataset }) {
             flexDirection : 'column',
             justifyContent : 'space-between'
           }}>
-          <Text size="sm">Latest Status</Text>
+          <Text size="2xs">Latest Status</Text>
         <Text size="sm">{date}</Text>
 
           </View>
@@ -80,25 +84,7 @@ export default function Active({status,order,total,items,date,dataset }) {
         <BadgeSymbol  text={status} action="warning" />
         </View>
          </Card>
-      {/* </Card>
-      <Card    
-      size="md"
-      variant={"filled"}
-      style={styles.body}
-    > */}
-        {/* <View style={[styles.innerBody]}>
-          <View style={{
-            height : 50,
-            flexDirection : 'column',
-            justifyContent : 'space-between'
-          }}>
-          <Text size="sm">Latest Status</Text>
-        <Text size="sm">{date}</Text>
-
-          </View>
-         
-        <BadgeSymbol  text={status}/>
-        </View> */}
+     
         
         </Card>
        
@@ -109,7 +95,8 @@ export default function Active({status,order,total,items,date,dataset }) {
 const styles = StyleSheet.create({
   container: {
     borderRadius: 8,
-    marginVertical: (windowWidth * 0.2) / 100
+    marginVertical: (windowWidth * 0.2) / 100,
+    // backgroundColor : 
   },
   background : {
     padding: 10,
@@ -126,7 +113,7 @@ const styles = StyleSheet.create({
     // letterSpacing : 0.5
   },
   body: {
-    // backgroundColor: "#ffffff"
+    backgroundColor: "#ffffff"
   },
   header: {
     color : 'red',

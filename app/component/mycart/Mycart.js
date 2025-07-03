@@ -13,8 +13,8 @@ export default function Mycart() {
     //  onPress={()=>router.push('screen/cart/Cart')}
     onPress={()=>router.push('/(drawer)/(tabs)/cart')}
     >
-    <Entypo name="shopping-cart" size={24} color="black" />
-    <Text>{cart?.length > 0 &&  "("+ cart?.length + ") "}</Text>
+    <Entypo name="shopping-cart" size={24} color="white" />
+    <Text color='white'>{cart?.length > 0 &&  "("+ cart?.length + ") "}</Text>
     </TouchableOpacity>
     
    

@@ -2,8 +2,8 @@ import { View,StyleSheet } from 'react-native'
 import React,{useState} from 'react'
 import { KeyboardAvoidingView,VStack,Heading,Text,Input,InputField,InputIcon, InputSlot,EyeIcon, EyeOffIcon  } from '@gluestack-ui/themed'
 
-export default function InputBox({size,placeholder,isPasswordField,label,name,setInputValue,width,height,
-  isnumber,isLabel,isReadOnly,value,fontSize,variant,color}) {
+export default function InputBox({size,placeholder,isPasswordField,label,text,name,setInputValue,width,height,
+  isnumber,isLabel,isReadOnly,value,fontSize,variant,color,labelColor}) {
     const [showPassword, setShowPassword] = useState(false)
     const handleState = () => {
       setShowPassword((showState) => {
@@ -18,7 +18,7 @@ export default function InputBox({size,placeholder,isPasswordField,label,name,se
       <VStack space="lg">
         {
           isLabel &&
-          <Text className="text-bold-200" size="md" >{label}</Text>
+          <Text className="text-bold-200" size="md" color={labelColor}>{label}</Text>
         }
       
       <Input     
@@ -29,12 +29,14 @@ export default function InputBox({size,placeholder,isPasswordField,label,name,se
       width={width}
       height={height}
       isReadOnly = {isReadOnly}
+      borderRadius={15}
+      
     >
       <InputField 
       placeholder={placeholder} 
       type={!showPassword && isPasswordField ? "password" : isnumber ? "number" : "text"} 
       name ={name}
-      onChangeText={(text) => setInputValue(text,name)}
+      onChangeText={(text) => setInputValue(name,text)}
       style={[styles.extra,{
         fontSize : fontSize,
         color : color
@@ -60,6 +62,7 @@ export default function InputBox({size,placeholder,isPasswordField,label,name,se
 const styles = StyleSheet.create({
     extra : {
         // color : 'red',
-        borderRadius :  19
+        // borderRadius :  19
+        letterSpacing : 0.5
     }
 })

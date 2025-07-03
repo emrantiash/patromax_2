@@ -1,7 +1,7 @@
 import { View, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signIn,setLanguage } from "../../redux/slices/loginSlice";
+import { signIn, setLanguage, getLogin, testPost } from "../../redux/slices/loginSlice";
 import InputBox from "../../component/input/Input";
 import ButtonBox from "../../component/button/Button";
 import ImageItem from "../../component/image/ImageItem";
@@ -39,37 +39,63 @@ export default function LoginScreen() {
     setToastId(newId);
     toast.show({
       id: newId,
-      placement: "top right",
-      duration: 3000,
-      containerStyle : {
-        // backgroundColor : 'pink'
-        color : 'pink'
+      placement : "top",
+      duration: 2000,
+      containerStyle: {
+        backgroundColor : 'transoparent',
+        // color: "red",
       },
       render: ({ id }) => {
         const uniqueToastId = "toast-" + id;
         return (
-          <Toast nativeID={uniqueToastId} action="outline" variant="solid">
-            <ToastTitle></ToastTitle>
-            <ToastDescription>
-             Wrong Email or Password
-            </ToastDescription>
-          </Toast>
-        );
+          <Toast nativeID={uniqueToastId} action="muted" variant="solid" >
+          <ToastTitle></ToastTitle>
+          <ToastDescription>
+           Wrong Email or Password
+          </ToastDescription>
+        </Toast>
+        )
+        
       },
     });
   };
 
-  const setInputValue = (val, name) => {
-    // console.log("comes", val, name);
+  const setInputValue = (a, e) => {
+    const name = a;
+    const value = e;
+    // console.log(name, value);
+    setObject((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // console.log(object);
+
   const buttonClicked = () => {
-    dispatch(setLanguage(1))
-    dispatch(signIn());
-    setIsLoading(true);
-    handleToast();
-    router.push('/(tabs)/home')
-    // <Redirect href='/(tabs)/home' />
+    if(object.email == "") {
+      handleToast()
+    }
+    else {
+      setIsLoading(true);
+      dispatch(setLanguage(0));
+      const option = {
+        usr: object.email,
+        pwd: object.password,
+      };
+      
+      dispatch(getLogin(option)).then(function(e){
+        setIsLoading(false);
+        console.log("=======",e.payload.message)
+       e.payload.message == "Logged In" ?
+       router.push('/(tabs)/home')
+       :
+      ( console.log("hello") ,handleToast())  
+      })
+    }
+    
+   
+   
   };
   return (
     <View style={styles.container}>
@@ -117,7 +143,7 @@ export default function LoginScreen() {
           borderRadius={8}
           onClick={buttonClicked}
           icon={UnlockIcon}
-          color="white"
+          fontColor="white"
           // width = {'90%'}
         />
       </View>

@@ -46,9 +46,12 @@ export default function Exclusive() {
         </View>
 
         <ImageItem
-          src={require("../../../assets/images/home/exclusive.png")}
+           src={"https://petromax-test.s3.ap-south-1.amazonaws.com/petromax-image-3-04062025.jpg"}
           alt="no image"
-          size="xl"
+          size="lg"
+          marginVertical={10}
+          paddingVertical={10}
+          borderWidth={0}
         />
       </Card>
 

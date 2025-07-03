@@ -12,18 +12,24 @@ import {
   ChevronDownIcon,
 } from "@gluestack-ui/themed";
 
-export default function SelectBox({placeholder}) {
+
+
+export default function SelectBox({placeholder,data,selectedValue,height ,width}) {
+
   return (
     <Select 
     style={{
-        borderRadius : 20
+        borderRadius : 20,
+        fontSize :  14,
+        border : '1px solid red'
     }}
+    onValueChange={selectedValue}
     >
-      <SelectTrigger variant="outline" size="md" style={{
-        // backgroundColor : 'red',
+      <SelectTrigger variant="outline" size="sm" style={{
         borderRadius : 10,
-        height : 45,
-        backgroundColor : '#f3f3f3'
+        height : height,
+        width  : width,
+        // borderColor : '#fff'
       }}>
         <SelectInput placeholder={placeholder} />
         <SelectIcon className="mr-3" as={ChevronDownIcon} />
@@ -34,14 +40,18 @@ export default function SelectBox({placeholder}) {
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          <SelectItem label="UX Research" value="ux" />
-          <SelectItem label="Web Development" value="web" />
-          <SelectItem
-            label="Cross Platform Development Process"
-            value="Cross Platform Development Process"
-          />
-          <SelectItem label="UI Designing" value="ui" isDisabled={true} />
-          <SelectItem label="Backend Development" value="backend" />
+          {/* <SelectItem label="UX Research" value="ux" /> */}
+          {
+            data?.map((_data,index)=>
+             ( 
+            //  <SelectItem label={_data.name} value={_data.name} />
+            <SelectItem label={_data.name} value={_data.name}  key={index} textStyle={{
+              fontSize : 14
+            }}/>
+             )
+            )
+          }
+         
         </SelectContent>
       </SelectPortal>
     </Select>
