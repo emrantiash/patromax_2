@@ -1,27 +1,44 @@
 import { View, StyleSheet,FlatList } from 'react-native'
-import React from 'react'
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react'
+import { useSelector,useDispatch } from 'react-redux';
 import { Card,Text } from "@gluestack-ui/themed";
 import Active from '../../pages/active/Active';
 import { LinearGradient } from 'expo-linear-gradient';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { getActiveOrder } from '../../redux/slices/historySlice';
 import items from '../../(drawer)/data';
 import { getLocales } from 'expo-localization';
 import { i18n } from '../../utils/libs/localization/Localization';
+import useConfig from '../../lib/hook/config';
+import PSpinner from '../../component/spinner/Spinner';
 
 
 
 export default function Page() {
-  // const items = useSelector((state)=>state.orderReducer.active)
+  const dispatch = useDispatch();
+  const config = useConfig()
+ const items = useSelector((state)=>state.historyReducer.order_active);
+ const [isLoading, setIsLoading] = useState(true);
   const _language = useSelector((state)=>state.loginReducer.language) ;
   i18n.locale = getLocales()[_language].languageCode
+
+  console.log(items)
+
+  // useEffect(()=>{
+  //   let option = {
+  //     customer : config[2]
+  //   }
+  //   dispatch(getActiveOrder(option)).then(function(e){
+  //     console.log(e.payload.message.message)
+  //     setItems(e.payload.message.message)
+  //   })
+  // },[])
   return (
     <View style={styles.container}>
       
         <FlatList
         data={items}
         renderItem={({item}) => <Active 
-        order={item.order}
+        order={item.order.split(/[-]+/).pop()}
         total={item.total}
         items={item.items}
         status={item.status} 
@@ -38,10 +55,17 @@ export default function Page() {
           alignItems : 'center',
           margin : 10,
           padding :  10 
-        }}><Text style={{
-          fontSize : 12,
-          letterSpacing : 1.0
-        }}>No Item Found</Text></View>
+        }}>
+          {
+            isLoading ? 
+            <PSpinner /> :
+            <Text style={{
+              fontSize : 12,
+              letterSpacing : 1.0
+            }}>No Item Found</Text>
+
+          }
+          </View>
       )}
       />
       

@@ -1,11 +1,10 @@
 import { View, StyleSheet, Dimensions } from "react-native";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signIn, setLanguage, getLogin, testPost } from "../../redux/slices/loginSlice";
+import { signIn, setLanguage, getLogin, testPost, setLanguageName } from "../../redux/slices/loginSlice";
 import InputBox from "../../component/input/Input";
 import ButtonBox from "../../component/button/Button";
 import ImageItem from "../../component/image/ImageItem";
-import { Redirect } from "expo-router";
 import {
   UnlockIcon,
   Text,
@@ -14,6 +13,7 @@ import {
   ToastTitle,
   ToastDescription,
 } from "@gluestack-ui/themed";
+import { getDashboard } from "../../redux/slices/historySlice";
 import { router, Link } from "expo-router";
 import PSpinner from "../../component/spinner/Spinner";
 const width = Dimensions.get("window").width;
@@ -22,6 +22,8 @@ const height = Dimensions.get("window").height;
 export default function LoginScreen() {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const msg = useSelector((state)=>state.loginReducer.isError)
+  console.log(msg)
   const [object, setObject] = useState({
     email: "",
     password: "",
@@ -29,12 +31,12 @@ export default function LoginScreen() {
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
 
-  const handleToast = () => {
+  const handleToast = (data) => {
     if (!toast.isActive(toastId)) {
-      showNewToast();
+      showNewToast(data);
     }
   };
-  const showNewToast = () => {
+  const showNewToast = (data) => {
     const newId = Math.random();
     setToastId(newId);
     toast.show({
@@ -51,7 +53,7 @@ export default function LoginScreen() {
           <Toast nativeID={uniqueToastId} action="muted" variant="solid" >
           <ToastTitle></ToastTitle>
           <ToastDescription>
-           Wrong Email or Password
+           {data}
           </ToastDescription>
         </Toast>
         )
@@ -74,23 +76,30 @@ export default function LoginScreen() {
 
   const buttonClicked = () => {
     if(object.email == "") {
-      handleToast()
+      handleToast("Please Fill All Field")
     }
     else {
       setIsLoading(true);
       dispatch(setLanguage(0));
+      // dispatch(setLanguageName("English"))
       const option = {
         usr: object.email,
         pwd: object.password,
       };
+      // router.push('/(tabs)/home') 
       
       dispatch(getLogin(option)).then(function(e){
         setIsLoading(false);
-        console.log("=======",e.payload.message)
-       e.payload.message == "Logged In" ?
-       router.push('/(tabs)/home')
-       :
-      ( console.log("hello") ,handleToast())  
+       if(e.payload.message == "Logged In") {
+        let option = {
+          customer : e.payload.full_name
+        }
+        dispatch(getDashboard(option));
+        (router.push('/(tabs)/home') )
+       }
+       
+       else
+      (handleToast("Wrong UserName or Password"))  
       })
     }
     
@@ -106,10 +115,12 @@ export default function LoginScreen() {
           size="lg"
         />
       </View>
+     {/* <Text size="sm">Error is : {msg}</Text>  */}
       <View style={styles.inBetween}>
         <InputBox
           isLabel
           label="Email"
+          borderRadius={15}
           //  variant="rounded"
           //  size="2xl"
           height={(height * 6) / 100}
@@ -122,6 +133,7 @@ export default function LoginScreen() {
         <InputBox
           isLabel
           label="Password"
+          borderRadius={15}
           // variant="rounded"
           height={(height * 6) / 100}
           placeholder={"Enter Password"}

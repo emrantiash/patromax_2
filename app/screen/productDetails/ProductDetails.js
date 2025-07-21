@@ -220,19 +220,23 @@ export default function ProductDetails() {
         // height : 10,
         // backgroundColor  :'yellow'
       }}>
+            {/* <P style={{ textDecoration: 'line-through' }}>Strikethrough text</P> */}
         <Card style={styles.desCard}>
           <View style={styles.inside}>
             <View>
-              <Text size="sm">Total Price</Text>
-              <Text size="lg" bold>
-                ${data.price}
+              <Text size="md">Total Price</Text>
+              <Text size="sm"  style={{
+                textDecorationLine : 'line-through'
+              }}>Tk {data.basePrice}
+              </Text>
+              <Text size="lg" bold >Tk {data.after_discount}
               </Text>
             </View>
             <View
               style={{
-                width: "50%",
+                width: "75%",
                 flexDirection: "row",
-                justifyContent: "center",
+                justifyContent: "flex-end",
                 alignItems: "center"
               }}
             >
@@ -240,7 +244,7 @@ export default function ProductDetails() {
                 isIcon={true}
                 text=""
                 action="default"
-                width={(width * 10) / 100}
+                width={(width * 13) / 100}
                 size="sm"
                 icon={RemoveIcon}
                 onClick={negetiveCalled}
@@ -255,12 +259,13 @@ export default function ProductDetails() {
                 value={value.toString()}
                 fontSize={10}
                 height={(height * 5) / 100}
+                textAlign={"center"}
               />
               <ButtonBox
                 isIcon={true}
                 text=""
                 action="default"
-                width={(width * 10) / 100}
+                width={(width * 13) / 100}
                 size="sm"
                 icon={AddIcon}
                 onClick={positiveCalled}

@@ -19,25 +19,30 @@ const _horizontal = (windowWidth * 2) / 100;
 const _variant = "elevated";
 
 
-export default function Active({status,order,total,items,date,dataset }) {
+export default function Active({status,order,total,items,date,dataset,action }) {
   const dispatch = useDispatch()
   const makeTheCall =(data) =>{
 
+    let _data = {
+      ...data ,
+      page_status : 1
+    }
+
     // console.log(data)
-    dispatch(storeOrder(data))
+    dispatch(storeOrder(_data))
     router.push("screen/orderDetails/OrderDetails")
   }
   return (
-    <TouchableOpacity style={styles.container}
+    <TouchableOpacity 
+    style={styles.container}
     onPress={()=>makeTheCall(dataset)}
     >
       <Card
         size="md"
-        variant={"filled"}
-         // className="m-3"
+        variant={"ghost"}
         style={styles.body}
       >
-        <Card>
+        <Card style={styles.innerCard}>
         <LinearGradient colors={[ '#fff' , '#fff']}
         // '#e8f7f1','#fff4f2',#e5e4d2
         
@@ -45,11 +50,11 @@ export default function Active({status,order,total,items,date,dataset }) {
         style={styles.background}
         >
         <View style={styles.header}>
-          <Text size="md"  style={styles.color} bold>
-            Order : {order}
+          <Text size="lg"  style={styles.blue} bold>
+           Order : {order}
           </Text>
-          <Text size="md"  style={styles.color} color="green" bold>
-            Tk-{total}/-
+          <Text size="lg"  style={styles.color} color="green" bold>
+            Tk: {total}/-
            
           </Text>
          
@@ -59,7 +64,9 @@ export default function Active({status,order,total,items,date,dataset }) {
           items.map((data,index)=>
         <View style={styles.innerBody} key={index}>
           <Text size="sm" style={styles.letter} >
-          <Octicons name="dot" size={12} color="green" />  {data.name} | {data.capacity}
+          <Octicons name="dot" size={12} color="green" /> {" "}
+          {/* {data.name} | {data.capacity} */}
+           { data.capacity}
           </Text>
           <Text size="sm" sub >
             (Qty) {data.qty || data.quantity} 
@@ -68,20 +75,25 @@ export default function Active({status,order,total,items,date,dataset }) {
           )
         }
          </LinearGradient>
-         </Card>
-         <Card>
-         <View style={[styles.innerBody]}>
+         <View style={{ flex: 1, height: 1, backgroundColor: 'gray',opacity:0.1 }} />
+         {/* </Card>
+         <Card style={styles.innerCard}> */}
+         <View style={[styles.innerBody,{marginVertical : 10 }]}>
           <View style={{
             height : 50,
             flexDirection : 'column',
             justifyContent : 'space-between'
           }}>
-          <Text size="2xs">Latest Status</Text>
+          <Text size="xs" color="gray">Latest Status</Text>
         <Text size="sm">{date}</Text>
 
           </View>
-         
-        <BadgeSymbol  text={status} action="warning" />
+         <View style={{
+          marginTop : (windowHeight*1)/100 
+         }}>
+         <BadgeSymbol  text={status} action={action}  />
+         </View>
+            
         </View>
          </Card>
      
@@ -95,12 +107,19 @@ export default function Active({status,order,total,items,date,dataset }) {
 const styles = StyleSheet.create({
   container: {
     borderRadius: 8,
-    marginVertical: (windowWidth * 0.2) / 100,
-    // backgroundColor : 
+    // marginVertical: (windowWidth * 0.2) / 100,
+    backgroundColor : '#fff'
   },
   background : {
-    padding: 10,
+    // padding: 10,
     borderRadius: 5,
+  },
+  innerCard : {
+    backgroundColor : '#fff',
+    margin :  10
+  },
+  blue : {
+  color : '#d92f2f'
   },
   color : {
     // color : 'red',
@@ -113,7 +132,9 @@ const styles = StyleSheet.create({
     // letterSpacing : 0.5
   },
   body: {
-    backgroundColor: "#ffffff"
+    backgroundColor: "#fff",
+    margin : 0,
+    padding : 0
   },
   header: {
     color : 'red',
@@ -128,7 +149,7 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 5,
+    // paddingVertical: 5,
   },
 
   imagesGroup: {
@@ -142,4 +163,7 @@ const styles = StyleSheet.create({
     // justifyContent : 'space-between',
     width: 200,
   },
+  lines : {
+    opacity : 0.1
+  }
 });

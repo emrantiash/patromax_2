@@ -14,7 +14,7 @@ export default function Page() {
            <Redirect href="/(tabs)/home" />
 
         )}
-                   {/* <Redirect href="/(drawer)/settings" /> */}
+                   {/* <Redirect href="/(tabs)/cart" /> */}
         {/* <Redirect href="/(tabs)/home" /> */}
       </View>
     </View>

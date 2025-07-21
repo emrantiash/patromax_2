@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image,Dimensions } from "react-native";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch,useSelector } from "react-redux";
 import { signout } from "../redux/slices/loginSlice";
 import { Drawer } from "expo-router/drawer";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -11,6 +11,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, usePathname } from "expo-router";
 import useConfig from "../lib/hook/config";
+import { getLocales } from 'expo-localization';
+import { i18n } from "../utils/libs/localization/Localization";
 
 const width =  Dimensions.get('window').width 
 const image_size =  (width * 6) / 100
@@ -19,6 +21,9 @@ const CustomDrawerContent = (props) => {
   const config = useConfig();
   const pathname = usePathname();
   const dispatch = useDispatch()
+  const _language = useSelector((state)=>state.loginReducer.language )  ;
+  // console.log(_language)
+  i18n.locale = getLocales()[_language]?.languageCode
 
   useEffect(() => {
   }, [pathname]);
@@ -70,7 +75,7 @@ const CustomDrawerContent = (props) => {
         icon={({ color, size }) => (
             <Fontisto name="favorite" size={image_size} color={pathname == "/favourites" ? "#fff" : "#DF2B2A"}  />
         )}
-        label={"Statement"}
+        label={i18n.t('Statement')}
         labelStyle={[
           styles.navItemLabel,
           { color: pathname == "/favourites" ? "#fff" : "#000" },
@@ -87,7 +92,7 @@ const CustomDrawerContent = (props) => {
         icon={({ color, size }) => (
           <MaterialIcons name="account-circle" size={image_size} color={pathname == "/profile" ? "#fff" : "#DF2B2A"} />
         )}
-        label={"My Account"}
+        label={i18n.t('MY_ACCOUNT')}
         
         labelStyle={[
           styles.navItemLabel,

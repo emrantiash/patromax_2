@@ -1,5 +1,5 @@
 import { View, StyleSheet,FlatList } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card,Text } from "@gluestack-ui/themed";
 import Active from '../pages/active/Active';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,6 +9,9 @@ import {items} from './data'
 
 
 export default function orderHistory() {
+
+  const [data,setData] = useState("")
+ 
   return (
     <View style={styles.container}>
         {/* <Active /> */}

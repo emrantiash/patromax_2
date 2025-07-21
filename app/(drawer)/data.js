@@ -7,6 +7,7 @@ export const  items = [
     subtotal : "3000",
     tax : "100",
     total : "3100",
+    due : "1000",
     status : "Pending",
     date : "12:05pm,Thrusday,12/10/2024",
     items : [
@@ -30,7 +31,7 @@ export const  items = [
   
 ]
 
-const  past_items = [
+export const  past_items = [
   {
     id : 1,
   order : "#113D34A",

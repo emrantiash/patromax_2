@@ -84,7 +84,8 @@ const _layout = () => {
                     size={25}
                     color="#fff"
                     // onPress={() => router.push("/(drawer)/(tabs)/history")}
-                    onPress={()=>router.push("screen/activeScreen/ActiveScreen")}
+                    // onPress={()=>router.push("/(drawer)/(tabs)/history")}
+                    onPress={()=>router.back()}
                   />
                 ),
               }}
@@ -101,12 +102,12 @@ const _layout = () => {
                     onPress={() => router.back()}
                   />
                 ),
-                headerRight: () => <Mycart />,
-                headerRightContainerStyle: {
-                  marginEnd: 5,
-                  padding: 5,
-                  cursor: "pointer",
-                },
+                // headerRight: () => <Mycart />,
+                // headerRightContainerStyle: {
+                //   marginEnd: 5,
+                //   padding: 5,
+                //   cursor: "pointer",
+                // },
               }}
             />
             <Stack.Screen

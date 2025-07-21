@@ -1,10 +1,12 @@
 import {
+  SafeAreaView,
   ScrollView,
   View,
   StyleSheet,
   Dimensions,
   FlatList,
   TouchableOpacity,
+  VirtualizedList,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,6 +17,7 @@ import {
   makeCompareZero,
   storeData,
   storeTotal,
+  storeDue,
 } from "../../../redux/slices/cartSlice";
 import {
   Card,
@@ -47,21 +50,26 @@ export default function index() {
   const compare = useSelector((state) => state.cartReducer.compare);
   const [data, setData] = useState(
     useSelector((state) => state.cartReducer.data)
-  ); //useState(_data);
+  ); //useState(_data);//useState(_data); //
   const [myData, setMyData] = useState([]);
   const [total, setTotal] = useState(0.0);
 
-  console.log("===compare data is ====" + JSON.stringify(compare));
+  // console.log("===compare data is ====" + _language);
 
-  i18n.locale = getLocales()[_language].languageCode;
+  i18n.locale = getLocales()[_language]?.languageCode;
 
-  useEffect(() => {
-    data == undefined && dispatch(getMyCart());
-  }, [data == undefined]);
+  //  console.log(i18n.locale)
+
+  // useEffect(() =>
+  //   data == undefined && dispatch(getMyCart());
+  // }, [data == undefined]);
+
+  // useEffect(()=>{
+  //   dispatch(getMyCart())
+  // },[])
 
   useEffect(() => {
     _mydata.map((__data, index) => {
-      console.log(__data.id);
       if (__data.id == compare?.id) {
         const item = __data;
         const updatedItem = {
@@ -69,22 +77,13 @@ export default function index() {
           quantity: parseInt(compare.quantity) + parseInt(__data.quantity),
           price: parseInt(compare.basePrice) * parseInt(compare.quantity),
         };
-
-        // console.log("==updated item=="+JSON.stringify(updatedItem))
         const newState = [..._mydata];
 
         newState.splice(_mydata.indexOf(item), 1, updatedItem);
-        // console.log("==" + JSON.stringify(newState));
         setData(newState);
       }
     });
   }, [compare]);
-
-  // console.log("database"+JSON.stringify(data))
-
-  // useEffect(() => {
-  //   <Redirect href="screen/cart/Cart" />;
-  // });
 
   useEffect(() => {
     let total = 0.0;
@@ -105,12 +104,12 @@ export default function index() {
     const updatedItem = {
       ...thisItem,
       quantity: parseInt(thisItem.quantity) + 1,
-      price: parseInt(thisItem.basePrice) * (parseInt(thisItem.quantity) + 1),
+      price:
+        parseInt(thisItem.after_discount) * (parseInt(thisItem.quantity) + 1),
     };
     const newState = [...data];
 
     newState.splice(data.indexOf(item), 1, updatedItem);
-    // console.log("==" + JSON.stringify(newState));
     setData(newState);
   };
 
@@ -125,7 +124,8 @@ export default function index() {
       const updatedItem = {
         ...thisItem,
         quantity: parseInt(thisItem.quantity) - 1,
-        price: parseInt(thisItem.basePrice) * (parseInt(thisItem.quantity) - 1),
+        price:
+          parseInt(thisItem.after_discount) * (parseInt(thisItem.quantity) - 1),
       };
       const newState = [...data];
       newState.splice(data.indexOf(item), 1, updatedItem);
@@ -144,6 +144,7 @@ export default function index() {
       item.quantity > 0 && setMyData((oldArray) => [...oldArray, item]);
     });
     dispatch(storeTotal(total));
+    dispatch(storeDue(total));
   };
 
   const confirmedCalled = () => {
@@ -179,46 +180,67 @@ export default function index() {
       status: "UnPaid",
       subtotal: subtotal,
       tax: tax,
+      paid_amount: 0,
       total: subtotal + tax,
+      page_status: 0,
     };
 
     // temporary
-    let active = [
-      {
-        id: 1,
-        order: "#113D34C",
-        subtotal: subtotal,
-        tax: tax,
-        total: subtotal + tax,
-        status: "Unpaid",
-        date: currTime + "," + day + "," + date + "/" + month + "/" + year,
-        items: newArray,
-      },
-    ];
+    // let active = [
+    //   {
+    //     id: 1,
+    //     order: "#113D34C",
+    //     subtotal: subtotal,
+    //     tax: tax,
+    //     total: subtotal + tax,
+    //     status: "Unpaid",
+    //     date: currTime + "," + day + "," + date + "/" + month + "/" + year,
+    //     items: newArray,
+    //   },
+    // ];
 
-    // temporary
-    dispatch(activeOrder(active));
+    // // temporary
+    // dispatch(activeOrder(active));
     dispatch(storeOrder(_data));
     router.push("screen/orderDetails/OrderDetails");
   };
 
   const itemSelected = (item) => {
-    // setData()
-    console.log(item);
     dispatch(storeProduct(item));
     router.push("screen/productDetails/ProductDetails");
   };
 
+  const setInputValue = (a, e) => {
+    const thisItem = a;
+    const value = e ? e : 0;
+    const item = data.find((x) => x.id === thisItem.id);
+    const updatedItem = {
+      ...thisItem,
+      quantity: value && value.replace(/^[0]*/, ""),
+      price: parseInt(thisItem.basePrice) * parseInt(value),
+    };
+    const newState = [...data];
+
+    newState.splice(data.indexOf(item), 1, updatedItem);
+    setData(newState);
+  };
+
   return (
-    <>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <View
+        style={{
+          flex: 1,
+          marginTop: (height * 2) / 100,
+        }}
+      >
         <FlatList
+          removeClippedSubviews={false}
           ListEmptyComponent={renderNoStateMessage}
-          data={data}
+          data={data || _data}
           renderItem={({ item }) => (
-            <Card style={styles.mycart}>
+            <Card variant="ghost" style={styles.mycart}>
               <LinearGradient
-                colors={["#f9f9f9", "#fff"]}
+                colors={["#fff", "#fff"]}
                 start={{ x: 0.2, y: 0.8 }}
                 end={{ x: 0.2, y: 0.4 }}
                 style={styles.background}
@@ -231,65 +253,76 @@ export default function index() {
                     >
                       <ImageItem src={item?.image} size="lg" borderWidth={0} />
                     </TouchableOpacity>
-
-                    {/* <View>
-                      <Text size="md" style={styles.spacing}>
-                        {item?.name}
-                      </Text>
-                      <Text size="sm">Capacity : {item?.capacity}</Text>
-                      <Text size="sm">${item?.basePrice}</Text>
-                    </View> */}
                   </View>
                   <View style={styles.rightSide}>
-                    <View>
-                      <Text size="xs" style={styles.spacing} bold>
+                    <View style={{
+                      flexDirection : 'column',
+                      justifyContent : 'space-between'
+                    }}>
+                      <Text size="md" style={styles.spacing} bold>
                         {item?.name}
                       </Text>
-                      <Text size="2xs">{item?.capacity}</Text>
-                      <Text size="xl" color="green" bold>
-                        Tk:{item?.basePrice}
+                      <Text size="xs">{item?.capacity}</Text>
+                      <Text size="lg" color="green" bold>
+                        Tk:{item?.after_discount}
                       </Text>
                     </View>
 
                     <View
                       style={{
-                        marginVertical: 10,
-                        width: "50%",
-                        flexDirection: "row",
+                        //  marginVertical: 3,
+                        // flexDirection: "row",
                         justifyContent: "center",
                         alignItems: "center",
+                        // backgroundColor: "red",
+                       
+                        
                       }}
                     >
+                      <View style={{
+                        marginLeft :  -10 ,
+                        flexDirection : 'row',
+                        marginTop : 8
+                      }}>
                       <ButtonBox
                         isIcon={true}
                         text=""
                         action="default"
-                        width={(width * 10) / 100}
+                        variant="link"
+                        width={(width * 14) / 100}
                         size="xs"
                         icon={RemoveIcon}
                         onClick={() => negetiveCalled(item)}
                         color="green"
                       />
+
                       <InputBox
-                        isReadOnly={true}
-                        size="md"
+                        name={item}
+                        size={"xl"}
                         isnumber={true}
-                        width={30}
-                        height={20}
-                        value={item?.quantity?.toString()}
-                        fontSize={10}
+                        width={(width*15)/100}
+                        height={(height * 4) / 100}
+                        value={item?.quantity?.toString() || 0}
+                        fontSize={12}
                         color="green"
+                        setInputValue={setInputValue}
+                        borderRadius={4}
+                        textAlign = "center"
                       />
+
                       <ButtonBox
                         isIcon={true}
                         text=""
                         action="default"
-                        width={(width * 10) / 100}
+                        width={(width * 14) / 100}
                         size="xs"
                         icon={AddIcon}
                         onClick={() => positiveCalled(item)}
                         color="green"
                       />
+
+                      </View>
+                     
                     </View>
                   </View>
                 </View>
@@ -300,13 +333,25 @@ export default function index() {
           ListFooterComponent={() => <Text></Text>}
         />
       </View>
-      <View>
-        <Card>
+      <View style={{
+        backgroundColor : '#fff'
+      }}>
+        <Card
+        variant = "ghost"
+          style={
+            {
+               backgroundColor: "#fff",
+               
+              // width: "100%",
+            }
+          }
+        >
           <View style={styles.summery}>
             <Text size="md" style={styles.total}>
-              {i18n.t("Total")} : Tk: {total}
+              {i18n.t("Total")} : 
             </Text>
-            <View>
+            <Text>Tk {total}</Text>
+            {/* <View>
               <ButtonBox
                 action="negative"
                 text={i18n.t("Proceed")}
@@ -315,27 +360,39 @@ export default function index() {
                 onClick={confirmedCalled}
                 fontColor={"#fff"}
               />
-            </View>
+            </View> */}
           </View>
           <View
             style={{
-              justifyContent: "center",
-              alignItems: "flex-end",
+              flexDirection : 'row',
+              justifyContent: "space-around",
+              alignItems: "center",
+              // height : 90
             }}
           >
+            
+              
             <ButtonBox
               variant={"outline"}
               action="secondary"
-              text="Proceed without payment"
-              width={(width * 80) / 100}
+              text={i18n.t("Proceed_without_payment")}
+              width={(width * 40) / 100}
               borderRadius={10}
               onClick={withoutPayment}
-              fontColor={"green"}
+              fontColor={"#2f2f2f"}
             />
+            <ButtonBox
+                action="negative"
+                text={i18n.t("Proceed")}
+                width={(width * 40) / 100}
+                borderRadius={10}
+                onClick={confirmedCalled}
+                fontColor={"#fff"}
+              />
           </View>
         </Card>
       </View>
-    </>
+    </SafeAreaView>
   );
 }
 
@@ -343,7 +400,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
+    // alignItems: "center",
     backgroundColor: "#fff",
   },
   containerImage: {
@@ -373,6 +430,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     backgroundColor: "#fff",
+    padding: (height*0.5)/100,
   },
   header: {
     width: "100%",
@@ -395,17 +453,20 @@ const styles = StyleSheet.create({
   },
   rightSide: {
     flexDirection: "column",
+    justifyContent : 'space-between',
+    alignItems : 'center',
     // backgroundColor : 'yellow',
     // flexDirection: "column",
-    justifyContent: "space-between",
-    // alignItems: "flex-end",
+    // justifyContent: "space-between",
+    // alignItems: "flex-start",
   },
   summery: {
     // height: 50,
-    marginVertical: 30,
+    marginVertical: (height*3)/100,
+    marginHorizontal :  (width*3)/100,
     flexDirection: "row",
-    justifyContent: "space-around",
-    // alignItems: "center",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   total: {
     // fontSize : 19,

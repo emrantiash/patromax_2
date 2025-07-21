@@ -2,21 +2,65 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 // import { act } from "react";
 // import { items } from "../../(drawer)/(tabs)/home/index#";
 import Endpoint from '../../utils/path/Path';
-import { get , post } from "../../utils/query/Query";
+import { get , post,put,customPost } from "../../utils/query/Query";
 
-export const getMyCart = createAsyncThunk('login', async () => {
-
+export const getMyCart = createAsyncThunk('get-cart', async (data) => {
   try {
-    const response = await get(Endpoint.cart)
+    const response = await post(Endpoint.cart,data)
     return response.data
   }
   catch (error) {
     return error.response.data
-  }
-
-}
-
+  }}
 )
+
+export const postOrder = createAsyncThunk('post-order', async (data) => {
+  try {
+    const response = await post(Endpoint.save,data)
+    return response.data
+  }
+  catch (error) {
+    return error.response.data
+  }}
+)
+
+export const submitOrder = createAsyncThunk("put-order", async (data) => {
+  try {
+    const response = await put(Endpoint.submit, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+export const submitPayment = createAsyncThunk("put-payment-order", async (data) => {
+  try {
+    const response = await put(Endpoint.paymentSubmit, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+export const submitInvoice = createAsyncThunk("put-invoice-order", async (data) => {
+  try {
+    const response = await put(Endpoint.invoiceSubmit, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+export const image_upload = createAsyncThunk("image-ip", async (data) => {
+  try {
+    const response = await customPost(Endpoint.upload_image, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+
 
 const initialStateValues = {
   login: false,
@@ -27,7 +71,9 @@ const initialStateValues = {
   token: "",
   msg: "Network Error",
   total : 0.0,
-  compare : {}
+  due : 0.0,
+  compare : {},
+  image : ""
 };
 
 export const cartSlice = createSlice({
@@ -36,6 +82,9 @@ export const cartSlice = createSlice({
   reducers: {
     setDataStore : (state,action) =>{
       state.data = action.payload
+    },
+    storeImage : (state,action) =>{
+      state.image = action.payload
     },
     addToCart: (state, action) => {
     //  state.data = state.data ?  [...state.data,action.payload] : [action.payload]
@@ -62,6 +111,9 @@ export const cartSlice = createSlice({
 
     storeTotal : (state,action) =>{
       state.total = action.payload
+    },
+    storeDue : (state,action) =>{
+      state.due = action.payload
     },
     positiveSignCalled: (state, action) => {
       state.data = [
@@ -111,7 +163,8 @@ export const cartSlice = createSlice({
 // Action creators are generated for each case reducer function
 // export const { setlogin } = loginSlice.actions
 
-export const {setDataStore,storeTotal,addToCart,removeItem,storeData,addToCompare,makeCompareZero,positiveSignCalled,negativeSignCalled} = cartSlice.actions;
+export const {storeImage,setDataStore,storeTotal,storeDue,addToCart,removeItem,storeData,addToCompare,makeCompareZero,
+  positiveSignCalled,negativeSignCalled} = cartSlice.actions;
 
 export default cartSlice.reducer;
 

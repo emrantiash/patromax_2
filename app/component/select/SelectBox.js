@@ -11,24 +11,31 @@ import {
   SelectItem,
   ChevronDownIcon,
 } from "@gluestack-ui/themed";
+import { Dimensions } from "react-native";
+
+const _width = Dimensions.get('window').width 
 
 
 
-export default function SelectBox({placeholder,data,selectedValue,height ,width}) {
+export default function SelectBox({placeholder,data,selectedValue,height ,width,defaultValue}) {
 
   return (
     <Select 
     style={{
-        borderRadius : 20,
-        fontSize :  14,
+        borderRadius : 4,
+        fontSize :  12,
         border : '1px solid red'
     }}
     onValueChange={selectedValue}
+    defaultValue={defaultValue}
+    // selectedValue = {thisValue}
     >
       <SelectTrigger variant="outline" size="sm" style={{
-        borderRadius : 10,
+        borderRadius : 8,
         height : height,
         width  : width,
+        padding :  (_width * 2 )/100,
+        fontSize : 12
         // borderColor : '#fff'
       }}>
         <SelectInput placeholder={placeholder} />
@@ -45,7 +52,7 @@ export default function SelectBox({placeholder,data,selectedValue,height ,width}
             data?.map((_data,index)=>
              ( 
             //  <SelectItem label={_data.name} value={_data.name} />
-            <SelectItem label={_data.name} value={_data.name}  key={index} textStyle={{
+            <SelectItem label={_data.name} value={_data.value}  key={index} textStyle={{
               fontSize : 14
             }}/>
              )

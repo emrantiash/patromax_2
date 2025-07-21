@@ -21,17 +21,25 @@ export default function getHeaderFunction() {
   }
 }
 
+
+
 // Function for form data headers
 export function getHeaderFunctionFormData() {
-  // const SECRET_KEY = import.meta.env.VITE_SERVER_TOKEN_KEY;
   try {
-    const encryptedToken = localStorage.getItem(SECRET_KEY);
+    const encryptedToken = AsyncStorage.getItem("SECRET_KEY");
     if (!encryptedToken) {
       throw new Error("No token found in localStorage");
     }
 
+    const headers = {
+      Authorization: "token " + encryptedToken,
+      // 'Content-Encodeint': 'gzip'
+      'Content-Type': 'multipart/form-data',
+    };
+
+    return headers;
   } catch (error) {
-    console.error("Error getting headers for form data:", error);
+    console.error("Error getting headers:", error);
     return {}; // Return an empty object on error
   }
 }
@@ -61,18 +69,19 @@ export function customgetv2(end, data) {
 export function noHeaderpost(end, data) {
   // const con = useConfig()
   // const headers = getHeaderFunction();
-  console.log(Network.network + end, data);
+  // console.log(Network.network + end, data);
   return axios.post(Network.network + end, data);
 }
 
 export function post(end, data) {
   const headers = getHeaderFunction();
-  console.log(Network.network + end, data, { headers })
+  // console.log(Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 
 export function customPost(end, data) {
   const headers = getHeaderFunctionFormData();
+  console.log("==image path==="+Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 
@@ -102,7 +111,7 @@ export function customput(end, data) {
 
 export function put(end, data) {
   const headers = getHeaderFunction();
-  Network.network + end + data[0], data[1], { headers };
+  // console.log(Network.network + end + data[0], data[1]);
   return axios.put(Network.network + end + data[0], data[1], { headers });
 }
 

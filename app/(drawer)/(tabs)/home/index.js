@@ -6,18 +6,22 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   StatusBar,
-  Platform
+  Platform,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch,useSelector } from "react-redux";
 import { Card, Text } from "@gluestack-ui/themed";
 import { BarChart } from "react-native-gifted-charts";
 import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { getMyCart } from "../../../redux/slices/cartSlice";
+import { getDashboard ,getActiveOrder} from "../../../redux/slices/historySlice";
 import { router } from "expo-router";
 import useConfig from "../../../lib/hook/config";
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
+
 const barData = [
   {
     value: 250,
@@ -59,13 +63,50 @@ const barData = [
 ];
 
 export default function index() {
-  const config = useConfig()
+  const dispatch = useDispatch();
+  const config = useConfig();
+  let newDate = new Date();
+    let date = newDate.getDate();
+    let month = newDate.toLocaleString('default', { month: 'long' });;
+    let year = newDate.getFullYear();
+    const __mydate = month+","+year
+
+  const [data,setData] = useState(barData) //useState(useSelector((state)=>state.historyReducer.data))
+  const [info,setInfo] = useState([])
+  console.log(info)
+  
+  useEffect(() => {
+
+    let option = {
+      customer : config[2]
+    }
+    dispatch(getDashboard(option)).then(function(e){
+      setData(e.payload.message.weekly_data)
+      setInfo(e.payload.message.stats)
+    })
+
+    
+   
+    dispatch(getMyCart(option));
+    
+  }, []);
+
   const shift_active = () => {
+    let option = {
+          customer : config[2]
+        }
+    dispatch(getActiveOrder(option))
     router.push("screen/activeScreen/ActiveScreen");
   };
+
   return (
     <ScrollView contentContainerStyle={styles.conatiner}>
-      <StatusBar backgroundColor="#DF2B2A" color="#fff" translucent={true} barStyle="light-content" />
+      <StatusBar
+        backgroundColor="#DF2B2A"
+        color="#fff"
+        translucent={true}
+        barStyle="light-content"
+      />
       <Card style={styles.headerTop}>
         <View style={styles.upperCard}>
           <Text size="lg" bold>
@@ -79,27 +120,28 @@ export default function index() {
               Total Purchase
             </Text>
             <Text size="lg" bold>
-              June 2015
+              {__mydate}
             </Text>
           </View>
 
-          <Text size="sm">Tk: 17000</Text>
+          <Text size="sm">Tk: {info?.total_spent_since_last_month}</Text>
         </View>
       </Card>
       <Card style={styles.header}>
         <BarChart
-        // xAxisTextNumberOfLines = {2}
+          // xAxisTextNumberOfLines = {2}
+          data={data}
           backgroundColor={"#fff"}
           showLine
           // isThreeD
           side="right"
-          isAnimated
+          // isAnimated
           width={width}
           barWidth={width / 7}
           noOfSections={4}
           barBorderRadius={4}
           frontColor="lightgray"
-          data={barData}
+          
           yAxisThickness={0}
           xAxisThickness={0}
         />
@@ -115,7 +157,7 @@ export default function index() {
           >
             <View style={styles.lowerInsideFirst}>
               <View>
-                <Text size="md">Total Orders</Text>
+                <Text size="md">{month} Orders</Text>
               </View>
 
               <View
@@ -130,7 +172,7 @@ export default function index() {
                     justifyContent: "flex-end",
                   }}
                 >
-                  <Text size="4xl">23</Text>
+                  <Text size="4xl">{info?.total_orders}</Text>
                 </View>
                 <View>
                   <Text> </Text>
@@ -144,8 +186,13 @@ export default function index() {
                 >
                   <View>
                     <Text size="lf" color="green">
-                      +12.4 %<Text> </Text>
-                      <SimpleLineIcons name="graph" size={14} color="green" />
+                      
+                      {info?.spending_increase_rate}%<Text> </Text>
+                      {
+                        info?.is_spending_increased && 
+                        <SimpleLineIcons name="graph" size={14} color="green" />
+                      }
+                      
                     </Text>
                   </View>
                   <View>
@@ -163,15 +210,20 @@ export default function index() {
               width: (width * 45) / 100,
             }}
           >
-            <TouchableOpacity 
-            onPress={shift_active}>
-              <View style={{
-                flexDirection : 'row',
-                justifyContent : 'space-between',
-                alignItems : 'center'
-              }}>
+            <TouchableOpacity onPress={shift_active}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
                 <Text size="md">Total Orders</Text>
-                <MaterialIcons name="arrow-forward-ios" size={15} color="black" />
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={15}
+                  color="black"
+                />
               </View>
               <View
                 style={{
@@ -179,7 +231,7 @@ export default function index() {
                   justifyContent: "flex-end",
                 }}
               >
-                <Text size="4xl">01 </Text>
+                <Text size="4xl">{info?.pending_orders}</Text>
               </View>
             </TouchableOpacity>
           </Card>
@@ -204,14 +256,14 @@ const styles = StyleSheet.create({
     // marginVertical  :  20
   },
   header: {
-    height: (height * 30) / 100,
+    height: Platform.OS === "ios" ? (height * 30) / 100 : (height * 35) / 100,
     // marginTop : 10 ,
     width: width,
     // marginVertical  :  20
   },
   upperCard: {
     flexDirection: "column",
-    marginVertical: Platform.OS==="ios" ? 20 : 5,
+    marginVertical: Platform.OS === "ios" ? 20 : 5,
     // paddingVertical: Platform.OS=="android" ? 5 : 10,
     // marginVertical :  20
     // justifyContent : ''

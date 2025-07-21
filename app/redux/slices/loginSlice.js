@@ -23,10 +23,14 @@ const initialStateValues = {
   success: false,
   isLoading: false,
   data: [],
+  info : [],
   isError: false,
+  error : "",
   token: "",
   msg : "Network Error",
-  language : 0 
+  language : 0 ,
+  language_name : "English",
+  full_name : ""
 }
 
 export const loginSlice = createSlice({
@@ -41,7 +45,11 @@ export const loginSlice = createSlice({
     },
     setLanguage : (state,action) =>{
       state.language =  action.payload
-    }
+      
+    },
+    setLanguageName : (state,action) =>{
+      state.language_name = action.payload
+    } 
   },
   extraReducers: (builder) => {
     builder.addCase(getLogin.pending, (state) => {
@@ -50,8 +58,10 @@ export const loginSlice = createSlice({
 
     builder.addCase(getLogin.fulfilled, (state, action) => {
       state.isLoading = false; // Loading finished
-      state.login = true; // Set login status
+      state.login = action.payload.message == "Logged In" ? true : false ; // Set login status
       state.data = action.payload.user_details;
+      state.info = action.payload.due;
+      state.full_name = action.payload.full_name
       const { api_key, api_secret } = action.payload.key_details || {};
       const token = `${api_key}:${api_secret}`; // Set token
       state.token = token;
@@ -60,9 +70,10 @@ export const loginSlice = createSlice({
       setLocalStorage(token);
     });
 
-    builder.addCase(getLogin.rejected, (state) => {
+    builder.addCase(getLogin.rejected, (state,action) => {
       state.login = false; // Reset login status
       state.isError = true; // Indicate an error
+      state.error = action.payload;
       state.isLoading = false; // Loading finished
       state.errorMsg = "Network Error"; // Set error message
     });
@@ -73,7 +84,7 @@ export const loginSlice = createSlice({
 // Action creators are generated for each case reducer function
 // export const { setlogin } = loginSlice.actions
 
-export const { signIn , signout, setLanguage } = loginSlice.actions
+export const { signIn , signout, setLanguage,setLanguageName } = loginSlice.actions
 
 export default loginSlice.reducer
 

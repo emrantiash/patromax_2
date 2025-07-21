@@ -1,24 +1,36 @@
 import { View, StyleSheet } from "react-native";
-import React from "react";
+import React,{useState} from "react";
+import { useDispatch,useSelector } from "react-redux";
 import { Card, Icon, CalendarDaysIcon, Switch ,Text,PlayIcon} from "@gluestack-ui/themed";
 import SelectBox from "../component/select/SelectBox";
+import { setLanguage, setLanguageName } from "../redux/slices/loginSlice";
 
 const data = [
   {
     id  : 1 ,
+    value : "0",
     name : "English"
   },
   {
     id :  2 , 
+    value : "1",
     name : "Bangla"
   }
 ]
 
 export default function settings() {
+  const dispatch = useDispatch()
 
-  const selectedValue =(e) =>{
-    console.log("=== ===  ===",e)
+  const _language =  useSelector((state)=>state.loginReducer.language_name)
+
+  const [mylanguage,setMylanguage] = useState(0)
+
+  const selectedValue =(value) =>{
+    // console.log("=== ===  ===",value)
+    // dispatch(setLanguage(parseInt(value)))
+    // dispatch(setLanguageName(name))
   }
+
   return (
     <View style={styles.container}>
       <Card
@@ -59,9 +71,10 @@ export default function settings() {
         <View style={styles.innerBody}>
           <Text size="md"> Language </Text>
           <SelectBox 
-          placeholder={"English"}
+          defaultValue={"English"}
           data={data}
           selectedValue={selectedValue}
+          // thisValue = {_language}
           // height={"90"}
           height={40}
           width={90}

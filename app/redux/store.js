@@ -6,6 +6,7 @@ import loginReducer from './slices/loginSlice';
 import productReducer from './slices/productSlice';
 import cartReducer from './slices/cartSlice';
 import orderReducer from './slices/orderSlice';
+import historyReducer from './slices/historySlice';
 // import storage from 'redux-persist/lib/storage'
 
 
@@ -25,7 +26,8 @@ const reducer = combineReducers({
     loginReducer: loginReducer,
     productReducer : productReducer,
     cartReducer : cartReducer,
-    orderReducer : orderReducer
+    orderReducer : orderReducer,
+    historyReducer :  historyReducer
 
 });
 

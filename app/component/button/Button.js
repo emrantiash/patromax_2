@@ -28,7 +28,11 @@ export default function ButtonBox({
   fontColor
 }) {
   return (
-    <View>
+    <View style={{
+      // backgroundColor : 'red',
+      padding : 0,
+      margin : 0
+    }}>
       <Button
         className={
           isClassName ? className : " "
@@ -39,6 +43,7 @@ export default function ButtonBox({
         width={width}
         onPress={onClick}
         borderRadius={borderRadius}
+        space = "xs"
         // style={{
         //   justifyContent: "center",
         //   alignItems: "center",

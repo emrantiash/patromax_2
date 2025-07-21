@@ -75,7 +75,7 @@ export default function _layout() {
       name="history"
       options={{
         // title : i18n.t('Profile'),
-        title : "History",
+        title : i18n.t('History'),
         tabBarTitle: 'History',
         // headerTitle : i18n.t('Profile'),
         headerTitle : "History",
@@ -99,8 +99,8 @@ export default function _layout() {
       name={"cart"}
       options={{
         // headerShown : false,
-        title : i18n.t('Orders')+ '(' + length +')',
-        // title : i18n.t('Orders'),
+        // title : i18n.t('Orders')+ '(' + length +')',
+         title : i18n.t('Orders'),
         // title : 'Cart',
         tabBarTitle: 'Cart',
         headerTitle : i18n.t('Orders'),
