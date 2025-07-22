@@ -721,6 +721,23 @@ export default function OrderDetails() {
             </View>
           </View>
         </Card>
+        {
+          data.page_status == 1 && 
+          <Card style={styles.body} variant="elevated">
+          <View>
+            <Text size="sm" style={[styles.letter, styles.shipping]} bold>
+              Payment History
+            </Text>
+          </View>
+          {/* <View style={styles.dateBody}>
+            <Text size="sm" style={styles.letter}>
+              139,Road 10,Sector-4,Uttara ,Dhaka-1230
+            </Text>
+            <Text size="sm">Contact : 01765667656</Text>
+          </View> */}
+        </Card>
+        }
+        
         <Card style={styles.body} variant="elevated">
           <View>
             <Text size="sm" style={[styles.letter, styles.shipping]} bold>
@@ -742,6 +759,7 @@ export default function OrderDetails() {
           backgroundColor: "#FF7276",
         }}
       >
+        
         {data.page_status == 0 ? (
           <TouchableOpacity style={styles.footer} onPress={call_sales_order}>
             <Text size="lg" color="white">
@@ -749,22 +767,15 @@ export default function OrderDetails() {
               {/* <AntDesign name="arrowright" size={12} color="red" /> */}
             </Text>
           </TouchableOpacity>
-        ) : (data?.page_status == 1 && data?.status == "unpaid") ||
-          data?.status == "partly paidd" ? (
-          <TouchableOpacity style={styles.footer} onPress={makeCallPayment}>
+        ) : 
+        <TouchableOpacity style={styles.footer} onPress={makeCallPayment}>
             <Text size="lg" color="white">
               Payment
               <AntDesign name="arrowright" size={12} color="white" />
             </Text>
           </TouchableOpacity>
-        ) : (
-          <View style={styles.footer}>
-            <Text size="lg" color="white">
-              Contact Support
-              <AntDesign name="arrowright" size={12} color="white" />
-            </Text>
-          </View>
-        )}
+        
+        }
       </Card>
     </>
   ) : (

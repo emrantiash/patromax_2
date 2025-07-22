@@ -87,7 +87,7 @@ export default function Page() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.selectBox}>
+      {/* <View style={styles.selectBox}>
         <SelectBox
           defaultValue="All"
           data={__selectdata}
@@ -95,7 +95,7 @@ export default function Page() {
           width={(width*24)/100}
           selectedValue={selectedValue}
         />
-      </View>
+      </View> */}
 
       <FlatList
         ListEmptyComponent={() => (

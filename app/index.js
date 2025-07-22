@@ -4,7 +4,6 @@ import { Redirect } from "expo-router";
 
 export default function Page() {
   const isLogin = useSelector((state)=>state.loginReducer.login)
-  console.log(isLogin)
   return (
     <View style={styles.container}>
       <View style={styles.main}>

@@ -71,7 +71,7 @@ const CustomDrawerContent = (props) => {
           headerTintColor :'#fff'
         }}
       />
-       <DrawerItem
+       {/* <DrawerItem
         icon={({ color, size }) => (
             <Fontisto name="favorite" size={image_size} color={pathname == "/favourites" ? "#fff" : "#DF2B2A"}  />
         )}
@@ -87,7 +87,7 @@ const CustomDrawerContent = (props) => {
         onPress={() => {
           router.push("/favourites");
         }}
-      />
+      /> */}
       <DrawerItem
         icon={({ color, size }) => (
           <MaterialIcons name="account-circle" size={image_size} color={pathname == "/profile" ? "#fff" : "#DF2B2A"} />
