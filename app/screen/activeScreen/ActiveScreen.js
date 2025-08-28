@@ -21,7 +21,13 @@ export default function Page() {
   const _language = useSelector((state)=>state.loginReducer.language) ;
   i18n.locale = getLocales()[_language].languageCode
 
-  console.log(items)
+  const calculate_payment = (data) =>{
+    let __amount = 0 
+    data.map((data)=>{
+      __amount = data.amount + __amount
+    })
+    return __amount
+  }
 
   // useEffect(()=>{
   //   let option = {
@@ -44,6 +50,9 @@ export default function Page() {
         status={item.status} 
         date={item.date}
         dataset={item}
+        action={item.status=="Paid" ?"success" : item.status=="Unpaid" ? "error" : "warning"}
+        // amount={calculate_payment(item.payment_Entry)}
+        amount={item.petromax_status || "Order Created"}
         />}
         keyExtractor={item => item.id}
     //     ListHeaderComponent = {() => (

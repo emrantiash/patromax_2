@@ -3,11 +3,22 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Endpoint from "../../utils/path/Path";
 import { post,noHeaderpost } from "../../utils/query/Query";
 
-
-export const getLogin = createAsyncThunk('get-login', async (data) => {
-  console.log("==action===",data)
+export const getOtp = createAsyncThunk('get-otp', async (data) => {
   try {
     const response = await noHeaderpost(Endpoint.login, data)
+    return response.data
+  }
+  catch (error) {
+    return error.response.data
+  }
+
+})
+
+
+export const getLogin = createAsyncThunk('get-login', async (data) => {
+  try {
+    // const response = await noHeaderpost(Endpoint.login, data)
+    const response = await noHeaderpost(Endpoint.varify, data)
     return response.data
   }
   catch (error) {
@@ -30,7 +41,8 @@ const initialStateValues = {
   msg : "Network Error",
   language : 0 ,
   language_name : "English",
-  full_name : ""
+  full_name : "",
+  challenge_id : ""
 }
 
 export const loginSlice = createSlice({
@@ -38,6 +50,7 @@ export const loginSlice = createSlice({
   initialState: initialStateValues,
   reducers: {
     signout: (state, action) => {
+      console.log("signout called")
       state.login = false
     },
     signIn : (state,action) => {
@@ -52,16 +65,33 @@ export const loginSlice = createSlice({
     } 
   },
   extraReducers: (builder) => {
+    builder.addCase(getOtp.pending, (state) => {
+      state.isLoading = true; // Set loading state
+    });
+
+    builder.addCase(getOtp.fulfilled, (state, action) => {
+      state.isLoading = false; // Loading finished
+      state.challenge_id = action.payload.message.challenge_id
+    });
+
+    builder.addCase(getOtp.rejected, (state,action) => {
+      state.login = false; // Reset login status
+      state.isError = true; // Indicate an error
+      state.error = action.payload;
+      state.isLoading = false; // Loading finished
+      state.errorMsg = "Network Error"; // Set error message
+    });
+
     builder.addCase(getLogin.pending, (state) => {
       state.isLoading = true; // Set loading state
     });
 
     builder.addCase(getLogin.fulfilled, (state, action) => {
       state.isLoading = false; // Loading finished
-      state.login = action.payload.message == "Logged In" ? true : false ; // Set login status
-      state.data = action.payload.user_details;
-      state.info = action.payload.due;
-      state.full_name = action.payload.full_name
+      state.login = action.payload.message.message == "Logged In" ? true : false ; // Set login status
+      state.data = action.payload.message.user_details;
+      state.info = action.payload.message.due;
+      state.full_name = action.payload.message.full_name
       const { api_key, api_secret } = action.payload.key_details || {};
       const token = `${api_key}:${api_secret}`; // Set token
       state.token = token;

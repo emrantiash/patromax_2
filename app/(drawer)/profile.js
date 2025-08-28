@@ -31,7 +31,6 @@ const width = Dimensions.get('window').width
 
 export default function Profile() {
   const config = useConfig();
-  console.log(config[1])
   const router = useRouter();
   return (
     <View style={styles.container}>

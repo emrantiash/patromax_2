@@ -175,7 +175,6 @@ export default function index() {
   };
 
   const itemSelected = (item) => {
-    console.log("called");
     dispatch(storeProduct(item));
     router.push("screen/productDetails/ProductDetails");
   };

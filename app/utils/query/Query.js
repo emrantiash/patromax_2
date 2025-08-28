@@ -33,7 +33,6 @@ export function getHeaderFunctionFormData() {
 
     const headers = {
       Authorization: "token " + encryptedToken,
-      // 'Content-Encodeint': 'gzip'
       'Content-Type': 'multipart/form-data',
     };
 
@@ -69,7 +68,7 @@ export function customgetv2(end, data) {
 export function noHeaderpost(end, data) {
   // const con = useConfig()
   // const headers = getHeaderFunction();
-  // console.log(Network.network + end, data);
+  console.log(Network.network + end, data);
   return axios.post(Network.network + end, data);
 }
 

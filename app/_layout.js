@@ -1,23 +1,54 @@
 import { GluestackUIProvider, Box } from "@gluestack-ui/themed";
 import { config } from "@gluestack-ui/config";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View, Button, Platform } from "react-native";
-import React from "react";
+import { StyleSheet, Text, View, Button, Platform,AppState } from "react-native";
+import React,{useEffect,useRef} from "react";
 import { store } from "./redux/store";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useSelector,useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { Stack, router } from "expo-router";
-import Feather from "@expo/vector-icons/Feather";
-import Mycart from "./component/mycart/Mycart";
-// import { i18n } from "./utils/libs/localization/Localization";
+import { signout } from "./redux/slices/loginSlice";
+import { useAutoLogout } from "./lib/hook/useAutoLogout";
 
 let persistor = persistStore(store);
-const _layout = () => {
+
+export default function _layout(){
   const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
-  // const backIcon =  "chevron-back" ;
+  const appState = useRef(AppState.currentState);
+  const handleLogout = () => {
+    // Implement your logout logic here
+    console.log('User logged out due to inactivity');
+    // Clear user data, navigate to login screen, etc.
+    router.push('/screen/loginScreen/LoginScreen');
+  };
+
+  const panHandlers = useAutoLogout(handleLogout);
+ 
+
+//    useEffect(() => {
+//     const subscription = AppState.addEventListener('change', nextAppState => {
+//       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+//         console.log('App has come to the foreground!');
+//         resetTimeout()
+//       } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
+//         console.log('App has gone to the background or become inactive!');
+       
+//       }
+//       appState.current = nextAppState;
+//     });
+// console.log("appState.current==="+appState.current)
+//     return () => {
+//       console.log("return ==="+appState.current)
+//       subscription.remove();
+//     };
+//   }, []);
+
+
+  
+
   return (
-    <Provider store={store}>
+    <Provider store={store} {...panHandlers}>
       <PersistGate persistor={persistor}>
         <GluestackUIProvider config={config}>
           <Stack
@@ -41,7 +72,7 @@ const _layout = () => {
                 headerShown: false 
                
               }}
-            /> 
+            />  
              <Stack.Screen
               name="screen/signupScreen/SignupScreen"
               screenOptions={{
@@ -166,6 +197,90 @@ const _layout = () => {
                 ),
               }}
             />
+             <Stack.Screen
+              name="screen/policy/PrivatePolicy"
+              options={{
+                title: " Private Policy",
+                headerStyle: {
+                  backgroundColor: "#DF2B2A",
+                  color: "#fff",
+                },
+                headerTitleStyle: {
+                  color: "#fff",
+                },
+                headerLeft: () => (
+                  <Ionicons
+                    name={backIcon}
+                    size={25}
+                    color="#fff"
+                    onPress={() => router.push("/(drawer)/settings")}
+                  />
+                ),
+              }}
+            />
+             <Stack.Screen
+              name="screen/services/Services"
+              options={{
+                title: " Terms of Services",
+                headerStyle: {
+                  backgroundColor: "#DF2B2A",
+                  color: "#fff",
+                },
+                headerTitleStyle: {
+                  color: "#fff",
+                },
+                headerLeft: () => (
+                  <Ionicons
+                    name={backIcon}
+                    size={25}
+                    color="#fff"
+                    onPress={() => router.push("/(drawer)/settings")}
+                  />
+                ),
+              }}
+            />
+             <Stack.Screen
+              name="screen/support/Support"
+              options={{
+                title: " Support",
+                headerStyle: {
+                  backgroundColor: "#DF2B2A",
+                  color: "#fff",
+                },
+                headerTitleStyle: {
+                  color: "#fff",
+                },
+                headerLeft: () => (
+                  <Ionicons
+                    name={backIcon}
+                    size={25}
+                    color="#fff"
+                    onPress={() => router.push("/(drawer)/settings")}
+                  />
+                ),
+              }}
+            />
+            <Stack.Screen
+              name="screen/varify/Varify"
+              options={{
+                title: " OTP",
+                headerStyle: {
+                  backgroundColor: "#DF2B2A",
+                  color: "#fff",
+                },
+                headerTitleStyle: {
+                  color: "#fff",
+                },
+                headerLeft: () => (
+                  <Ionicons
+                    name={backIcon}
+                    size={25}
+                    color="#fff"
+                    onPress={() => router.push("screen/loginScreen/LoginScreen")}
+                  />
+                ),
+              }}
+            />
             <Stack.Screen name="blog/index" options={{ headerTitle: "Blog" }} />
             <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
           </Stack>
@@ -175,7 +290,7 @@ const _layout = () => {
   );
 };
 
-export default _layout;
+// export default _layout;
 
 const styles = StyleSheet.create({});
 

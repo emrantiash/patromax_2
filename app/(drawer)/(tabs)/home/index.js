@@ -23,43 +23,25 @@ const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
 
 const barData = [
-  {
-    value: 250,
-    label: "Week 1",
-    frontColor: "#DF2B2A",
-    //   topLabelComponent: () => (
-    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>50</Text>
-    //   ),
-  },
-  {
-    value: 500,
-    label: "Week 2",
-    frontColor: "#DF2B2A",
-    sideColor: "#23A7F3",
-    topColor: "#92e6f6",
-    // topLabelComponent: () => (
-    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>560</Text>
-    //   ),
-  },
-  {
-    value: 745,
-    label: "Week 3",
-    frontColor: "#DF2B2A",
-    //   topLabelComponent: () => (
-    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>100</Text>
-    //   ),
-  },
-  {
-    value: 320,
-    label: "Week 4",
-    frontColor: "#DF2B2A",
-    //   topLabelComponent: () => (
-    //     <Text style={{color: 'blue', fontSize: 18, marginBottom: 6}}>50</Text>
-    //   ),
-  },
-  //   {value: 600, label: 'F', frontColor: '#177AD5'},
-  //   {value: 256, label: 'S'},
-  //   {value: 300, label: 'S'},
+  {value: 20, label: 'M',
+  topLabelComponent: () => (
+    <Text style={{color: 'blue', fontSize: 12, marginBottom: 6}}>20</Text>
+  )},
+    {value: 30, label: 'T',
+    topLabelComponent: () => (
+      <Text style={{color: 'blue', fontSize: 12, marginBottom: 6}}>30</Text>
+    )},
+    {
+      value: 50,
+      label: 'W',
+      topLabelComponent: () => (
+        <Text style={{color: 'blue', fontSize: 12, marginBottom: 6}}>50</Text>
+      ),
+    },
+    {value: 40, label: 'T',topLabelComponent: () => (
+      <Text style={{color: 'blue', fontSize: 12, marginBottom: 6}}>40</Text>
+    )},
+    // {value: 30, label: 'F'},
 ];
 
 export default function index() {
@@ -73,7 +55,7 @@ export default function index() {
 
   const [data,setData] = useState(barData) //useState(useSelector((state)=>state.historyReducer.data))
   const [info,setInfo] = useState([])
-  console.log(info)
+  // console.log(info)
   
   useEffect(() => {
 
@@ -81,7 +63,16 @@ export default function index() {
       customer : config[2]
     }
     dispatch(getDashboard(option)).then(function(e){
-      setData(e.payload.message.weekly_data)
+      let _array = e.payload?.message?.weekly_data
+      // setData(e.payload.message.weekly_data)
+      const updatedData = _array.map(row => ({
+        ...row, // Copy existing properties
+        topLabelComponent: () => (
+          <Text style={{color: 'green', fontSize: 10, margin : 0,padding : 0 }}>{row.value}</Text>
+        ),
+      }));
+      setData(updatedData);
+      // setData(e.payload.message.weekly_data)
       setInfo(e.payload.message.stats)
     })
 
@@ -91,6 +82,8 @@ export default function index() {
     
   }, []);
 
+  
+
   const shift_active = () => {
     let option = {
           customer : config[2]
@@ -98,6 +91,11 @@ export default function index() {
     dispatch(getActiveOrder(option))
     router.push("screen/activeScreen/ActiveScreen");
   };
+
+  // console.log("===data===",data)
+  console.log("===data===",info)
+
+
 
   return (
     <ScrollView contentContainerStyle={styles.conatiner}>
@@ -110,7 +108,7 @@ export default function index() {
       <Card style={styles.headerTop}>
         <View style={styles.upperCard}>
           <Text size="lg" bold>
-            Good Afternoon, {config[1]?.first_name} !
+            Welcome, {config[1]?.first_name} !
           </Text>
           <Text size="sm">Here's what you need to know today</Text>
         </View>
@@ -124,26 +122,42 @@ export default function index() {
             </Text>
           </View>
 
-          <Text size="sm">Tk: {info?.total_spent_since_last_month}</Text>
+          <Text size="sm">Tk: {Math.round(info?.total_spent_since_last_month)}</Text>
         </View>
       </Card>
       <Card style={styles.header}>
+     
         <BarChart
-          // xAxisTextNumberOfLines = {2}
           data={data}
           backgroundColor={"#fff"}
           showLine
           // isThreeD
-          side="right"
+          side=""
           // isAnimated
           width={width}
+          // height={200}
           barWidth={width / 7}
-          noOfSections={4}
+          noOfSections={5}
           barBorderRadius={4}
-          frontColor="lightgray"
+          frontColor="#1ABC9C"
           
           yAxisThickness={0}
           xAxisThickness={0}
+          // yAxisLabelTexts={['0', '1k', '2k', '3k', '800', '1k']}
+          labelWidth={40}
+          xAxisLabelTextStyle={{ color: '#000', textAlign: 'center',opacity : 0.5 }}
+          // showGradient
+          // gradientColor={'rgba(200, 100, 244,0.8)'}
+          // xAxisType={'dashed'}
+          xAxisColor={'lightgray'}
+          barStyle={{ 
+           margin : 0,
+           padding : 0,
+          //  backgroundColor : 'yellow'
+          }}
+         
+
+          
         />
       </Card>
       <Card style={styles.headerLower}>
@@ -153,6 +167,9 @@ export default function index() {
             variant="outline"
             style={{
               width: (width * 45) / 100,
+              // backgroundColor : 'green',
+              justifyContent : 'center',
+              alignItems : 'center'
             }}
           >
             <View style={styles.lowerInsideFirst}>
@@ -231,7 +248,7 @@ export default function index() {
                   justifyContent: "flex-end",
                 }}
               >
-                <Text size="4xl">{info?.pending_orders}</Text>
+                <Text size="2xl">{info?.pending_orders}</Text>
               </View>
             </TouchableOpacity>
           </Card>
@@ -252,21 +269,20 @@ const styles = StyleSheet.create({
   headerTop: {
     height: (height * 22) / 100,
     width: width,
-    justifyContent: "space-between",
-    // marginVertical  :  20
+    justifyContent: "space-between"
   },
   header: {
+    // backgroundColor : 'yellow',
+    // flex :1 ,
     height: Platform.OS === "ios" ? (height * 30) / 100 : (height * 35) / 100,
-    // marginTop : 10 ,
     width: width,
-    // marginVertical  :  20
+    justifyContent : 'center',
+    alignItems : 'center',
+    
   },
   upperCard: {
     flexDirection: "column",
-    marginVertical: Platform.OS === "ios" ? 20 : 5,
-    // paddingVertical: Platform.OS=="android" ? 5 : 10,
-    // marginVertical :  20
-    // justifyContent : ''
+    marginVertical: Platform.OS === "ios" ? 20 : 5
   },
   upperInside: {
     flexDirection: "row",
@@ -275,16 +291,13 @@ const styles = StyleSheet.create({
   headerLower: {
     height: (height * 33) / 100,
     width: "100%",
-    justifyContent: "center",
+    justifyContent: "center"
   },
   headerLowerInside: {
-    // backgroundColor : 'yellow',
     flexDirection: "row",
-    justifyContent: "space-between",
-    // alignItems : 'center'
+    justifyContent: "space-between"
   },
   lowerInsideFirst: {
-    // backgroundColor : 'red',
     height: 70,
     justifyContent: "space-between",
   },

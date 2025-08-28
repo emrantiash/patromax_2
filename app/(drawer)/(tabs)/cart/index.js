@@ -1,20 +1,14 @@
 import {
   SafeAreaView,
-  ScrollView,
   View,
   StyleSheet,
   Dimensions,
   FlatList,
-  TouchableOpacity,
-  VirtualizedList,
+  TouchableOpacity
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  removeItem,
-  positiveSignCalled,
-  negativeSignCalled,
-  makeCompareZero,
   storeData,
   storeTotal,
   storeDue,
@@ -23,20 +17,16 @@ import {
   Card,
   Text,
   AddIcon,
-  TrashIcon,
-  RemoveIcon,
-  Repeat1Icon,
-  Icon,
-  EyeIcon,
+  RemoveIcon
 } from "@gluestack-ui/themed";
 import { storeOrder, activeOrder } from "../../../redux/slices/orderSlice";
-import { storeProduct } from "../../../redux/slices/productSlice";
+import { storeProduct,getWareHouse,storeWareHouse } from "../../../redux/slices/productSlice";
 import ImageItem from "../../../component/image/ImageItem";
 import ButtonBox from "../../../component/button/Button";
 import InputBox from "../../../component/input/Input";
+import SelectBox from "../../../component/select/SelectBox";
 import { Redirect, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { getMyCart } from "../../../redux/slices/cartSlice";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 import _data from "../home/data";
@@ -48,28 +38,31 @@ export default function index() {
   const _language = useSelector((state) => state.loginReducer.language);
   const _mydata = useSelector((state) => state.cartReducer.data);
   const compare = useSelector((state) => state.cartReducer.compare);
-  const [data, setData] = useState(
-    useSelector((state) => state.cartReducer.data)
-  ); //useState(_data);//useState(_data); //
+  const warehouse = useSelector((state) => state.productReducer.warehouse);
+  const [data, setData] = useState(useSelector((state) => state.cartReducer.data)); //useState(_data);//useState(_data); //
   const [myData, setMyData] = useState([]);
   const [total, setTotal] = useState(0.0);
-
-  // console.log("===compare data is ====" + _language);
+  const [thisWarehouse,setThisWarehouse] = useState("")
 
   i18n.locale = getLocales()[_language]?.languageCode;
 
-  //  console.log(i18n.locale)
+  useEffect(() => {
+    const option = {
+      txt: "",
+      doctype: "Warehouse",
+      ignore_user_permissions: 0,
+      reference_doctype: "Sales Order",
+      page_length: 10,
+      filters: {
+        is_group: ["=", 0],
+      },
+    };
 
-  // useEffect(() =>
-  //   data == undefined && dispatch(getMyCart());
-  // }, [data == undefined]);
-
-  // useEffect(()=>{
-  //   dispatch(getMyCart())
-  // },[])
+    dispatch(getWareHouse(option))
+  }, []);
 
   useEffect(() => {
-    _mydata.map((__data, index) => {
+    _mydata?.map((__data, index) => {
       if (__data.id == compare?.id) {
         const item = __data;
         const updatedItem = {
@@ -149,10 +142,16 @@ export default function index() {
 
   const confirmedCalled = () => {
     _storeJob();
+    const originalArray = data;
+    const newArray = originalArray.filter((item) => item.quantity > 0);
+    thisWarehouse == ""  ? 
+    alert("Select WareHouse")  :
+    newArray.length > 0 && 
     router.push("screen/uploadScreen/UploadScreen");
   };
 
   const withoutPayment = () => {
+    // console.log(data)
     _storeJob();
     let newDate = new Date();
     let date = newDate.getDate();
@@ -171,36 +170,26 @@ export default function index() {
     });
 
     tax = Math.round((subtotal * 15) / 100);
-
+    const __mydate = year + "-" + month + "-" + date;
     const _data = {
+
       date: currTime + "," + day + "," + date + "/" + month + "/" + year,
-      id: 100,
+      date_use: __mydate,
+      time: currTime,
       items: newArray,
-      order: "#113D34CAG",
-      status: "UnPaid",
+      deposit: 0,
+      status: "Not paid",
       subtotal: subtotal,
       tax: tax,
       paid_amount: 0,
       total: subtotal + tax,
       page_status: 0,
+      is_previous: false,
+      warehouse : thisWarehouse
     };
 
-    // temporary
-    // let active = [
-    //   {
-    //     id: 1,
-    //     order: "#113D34C",
-    //     subtotal: subtotal,
-    //     tax: tax,
-    //     total: subtotal + tax,
-    //     status: "Unpaid",
-    //     date: currTime + "," + day + "," + date + "/" + month + "/" + year,
-    //     items: newArray,
-    //   },
-    // ];
 
-    // // temporary
-    // dispatch(activeOrder(active));
+
     dispatch(storeOrder(_data));
     router.push("screen/orderDetails/OrderDetails");
   };
@@ -217,13 +206,19 @@ export default function index() {
     const updatedItem = {
       ...thisItem,
       quantity: value && value.replace(/^[0]*/, ""),
-      price: parseInt(thisItem.basePrice) * parseInt(value),
+      price: parseInt(thisItem.after_discount) * parseInt(value),
     };
     const newState = [...data];
 
     newState.splice(data.indexOf(item), 1, updatedItem);
     setData(newState);
   };
+
+  const selectedValue = (val) =>{
+    setThisWarehouse(val)
+    dispatch(storeWareHouse(val))
+  }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -233,6 +228,17 @@ export default function index() {
           marginTop: (height * 2) / 100,
         }}
       >
+        <Card variant="ghost" style={{
+
+        }}>
+          <SelectBox 
+          // borderColor={"#FFC0CB"}
+          height={(height*5)/100}
+          placeholder ="Select WareHouse"
+          data={warehouse}
+          selectedValue ={selectedValue}
+          />
+        </Card>
         <FlatList
           removeClippedSubviews={false}
           ListEmptyComponent={renderNoStateMessage}
@@ -255,10 +261,12 @@ export default function index() {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.rightSide}>
-                    <View style={{
-                      flexDirection : 'column',
-                      justifyContent : 'space-between'
-                    }}>
+                    <View
+                      style={{
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                      }}
+                    >
                       <Text size="md" style={styles.spacing} bold>
                         {item?.name}
                       </Text>
@@ -275,54 +283,52 @@ export default function index() {
                         justifyContent: "center",
                         alignItems: "center",
                         // backgroundColor: "red",
-                       
-                        
                       }}
                     >
-                      <View style={{
-                        marginLeft :  -10 ,
-                        flexDirection : 'row',
-                        marginTop : 8
-                      }}>
-                      <ButtonBox
-                        isIcon={true}
-                        text=""
-                        action="default"
-                        variant="link"
-                        width={(width * 14) / 100}
-                        size="xs"
-                        icon={RemoveIcon}
-                        onClick={() => negetiveCalled(item)}
-                        color="green"
-                      />
+                      <View
+                        style={{
+                          marginLeft: -10,
+                          flexDirection: "row",
+                          marginTop: 8,
+                        }}
+                      >
+                        <ButtonBox
+                          isIcon={true}
+                          text=""
+                          action="default"
+                          variant="link"
+                          width={(width * 14) / 100}
+                          size="xs"
+                          icon={RemoveIcon}
+                          onClick={() => negetiveCalled(item)}
+                          color="green"
+                        />
 
-                      <InputBox
-                        name={item}
-                        size={"xl"}
-                        isnumber={true}
-                        width={(width*15)/100}
-                        height={(height * 4) / 100}
-                        value={item?.quantity?.toString() || 0}
-                        fontSize={12}
-                        color="green"
-                        setInputValue={setInputValue}
-                        borderRadius={4}
-                        textAlign = "center"
-                      />
+                        <InputBox
+                          name={item}
+                          size={"xl"}
+                          isnumber={true}
+                          width={(width * 15) / 100}
+                          height={(height * 4) / 100}
+                          value={item?.quantity?.toString() || 0}
+                          fontSize={12}
+                          color="green"
+                          setInputValue={setInputValue}
+                          borderRadius={4}
+                          textAlign="center"
+                        />
 
-                      <ButtonBox
-                        isIcon={true}
-                        text=""
-                        action="default"
-                        width={(width * 14) / 100}
-                        size="xs"
-                        icon={AddIcon}
-                        onClick={() => positiveCalled(item)}
-                        color="green"
-                      />
-
+                        <ButtonBox
+                          isIcon={true}
+                          text=""
+                          action="default"
+                          width={(width * 14) / 100}
+                          size="xs"
+                          icon={AddIcon}
+                          onClick={() => positiveCalled(item)}
+                          color="green"
+                        />
                       </View>
-                     
                     </View>
                   </View>
                 </View>
@@ -333,22 +339,22 @@ export default function index() {
           ListFooterComponent={() => <Text></Text>}
         />
       </View>
-      <View style={{
-        backgroundColor : '#fff'
-      }}>
+      <View
+        style={{
+          backgroundColor: "#fff",
+        }}
+      >
         <Card
-        variant = "ghost"
-          style={
-            {
-               backgroundColor: "#fff",
-               
-              // width: "100%",
-            }
-          }
+          variant="ghost"
+          style={{
+            backgroundColor: "#fff",
+
+            // width: "100%",
+          }}
         >
           <View style={styles.summery}>
             <Text size="md" style={styles.total}>
-              {i18n.t("Total")} : 
+              {i18n.t("Total")} :
             </Text>
             <Text>Tk {total}</Text>
             {/* <View>
@@ -364,14 +370,12 @@ export default function index() {
           </View>
           <View
             style={{
-              flexDirection : 'row',
+              flexDirection: "row",
               justifyContent: "space-around",
               alignItems: "center",
               // height : 90
             }}
           >
-            
-              
             <ButtonBox
               variant={"outline"}
               action="secondary"
@@ -382,13 +386,13 @@ export default function index() {
               fontColor={"#2f2f2f"}
             />
             <ButtonBox
-                action="negative"
-                text={i18n.t("Proceed")}
-                width={(width * 40) / 100}
-                borderRadius={10}
-                onClick={confirmedCalled}
-                fontColor={"#fff"}
-              />
+              action="negative"
+              text={i18n.t("Proceed")}
+              width={(width * 40) / 100}
+              borderRadius={10}
+              onClick={confirmedCalled}
+              fontColor={"#fff"}
+            />
           </View>
         </Card>
       </View>
@@ -430,7 +434,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "flex-start",
     backgroundColor: "#fff",
-    padding: (height*0.5)/100,
+    padding: (height * 0.5) / 100,
   },
   header: {
     width: "100%",
@@ -453,8 +457,8 @@ const styles = StyleSheet.create({
   },
   rightSide: {
     flexDirection: "column",
-    justifyContent : 'space-between',
-    alignItems : 'center',
+    justifyContent: "space-between",
+    alignItems: "center",
     // backgroundColor : 'yellow',
     // flexDirection: "column",
     // justifyContent: "space-between",
@@ -462,8 +466,8 @@ const styles = StyleSheet.create({
   },
   summery: {
     // height: 50,
-    marginVertical: (height*3)/100,
-    marginHorizontal :  (width*3)/100,
+    marginVertical: (height * 3) / 100,
+    marginHorizontal: (width * 3) / 100,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

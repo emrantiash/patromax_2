@@ -1,4 +1,12 @@
-import { View, StyleSheet, Dimensions, Image, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Dimensions,
+  Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -9,7 +17,6 @@ import {
   Toast,
   ToastTitle,
   ToastDescription,
-  ExternalLinkIcon,
 } from "@gluestack-ui/themed";
 import ButtonBox from "../../component/button/Button";
 import SelectBox from "../../component/select/SelectBox";
@@ -17,70 +24,82 @@ import InputBox from "../../component/input/Input";
 import * as ImagePicker from "expo-image-picker";
 import { i18n } from "../../utils/libs/localization/Localization";
 import { getLocales } from "expo-localization";
-import { router, Link } from "expo-router";
-import { storeOrder, activeOrder } from "../../redux/slices/orderSlice";
+import { router } from "expo-router";
+import { storeOrder, getBankName } from "../../redux/slices/orderSlice";
 import { storeImage } from "../../redux/slices/cartSlice";
-import useConfig from "../../lib/hook/config";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 
-const payment_method =[
+const payment_method = [
   {
-    id :1 ,
-    value : "Wire Transfer",
-    name : "Wire Transfer"
-  }
-]
-
-const bank_account = [
-  {
-    id : 1 ,
-    name : "BRAC Bank",
-    value : "BRAC Bank"
+    id: 1,
+    value: "Bank Deposit",
+    name: "Bank Deposit",
   },
-  {
-    id : 1 ,
-    name : "DBBL",
-    value : "DBBL"
-  },
-  {
-    id : 1 ,
-    name : "Bank Asia",
-    value : "Bank Asia"
-  },
-
-]
+];
 
 export default function UploadScreen() {
   const dispatch = useDispatch();
-  const config = useConfig();
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
   const total = useSelector((state) => state.cartReducer.total);
-  const due = useSelector((state) => state.cartReducer.due);
   const data = useSelector((state) => state.cartReducer);
-  const [depositValue,setDepositValue] = useState("");
-  const [bank,setBank] = useState("")
-
-  // console.log(data.data)
+  const [depositValue, setDepositValue] = useState("");
+  const [bank, setBank] = useState("");
   const _language = useSelector((state) => state.loginReducer.language);
   const [selectedImage, setSelectedImage] = useState([]);
-
+  const [myaccount, setMyaccount] = useState("");
   const [paid_amount, setPaid_amount] = useState(total);
-  const [mydate,setMydate] = useState("")
+  const [mydate, setMydate] = useState("");
 
   const [image, setImage] = useState("");
   const [createObjectURL, setCreateObjectURL] = useState("");
+  const [totalPaid, setTotalPaid] = useState(0);
 
-  useEffect(()=>{
+  const bank_account = useSelector((state) => state.orderReducer.banks);
+  const warehouse = useSelector(
+    (state) => state.productReducer.selectedWareHouse
+  );
+
+  useEffect(() => {
+    const option = {
+      txt: "",
+      doctype: "Bank Account",
+      ignore_user_permissions: 0,
+      reference_doctype: "Payment Entry",
+      page_length: 10,
+      filters: {
+        is_company_account: 1,
+        company: "Petromax",
+      },
+    };
+
+    dispatch(getBankName(option));
+  }, []);
+
+  useEffect(() => {
+    let paid = 0;
+    if (data?.data?.payment_Entry) {
+      data?.data?.payment_Entry?.map((data) => {
+        paid = paid + data.amount;
+      });
+      setTotalPaid(paid);
+      const currectDue = data.data.total - paid;
+      setPaid_amount(currectDue);
+    }
+  }, [data?.data?.payment_Entry]);
+
+  useEffect(() => {
     let newDate = new Date();
     let date = newDate.getDate();
     let month = newDate.getMonth() + 1;
     let year = newDate.getFullYear();
-    const __mydate = year+"-"+month+"-"+date 
-    setMydate(__mydate)
-  },[])
+    const __mydate = year + "-" + month + "-" + date;
+    setMydate(__mydate);
+  }, []);
+
+  // console.log(paid_amount)
 
   i18n.locale = getLocales()[_language].languageCode;
 
@@ -94,89 +113,81 @@ export default function UploadScreen() {
     });
 
     if (!result.canceled) {
-
-      setSelectedImage((prevImages) => [...prevImages, result.assets[0].uri]);
+      // setSelectedImage((prevImages) => [...prevImages, result.assets[0].uri]);
+      setSelectedImage([result.assets[0].uri]);
       const body = new FormData();
-
     } else {
       alert("You did not select any image.");
     }
   };
 
-  // const _image = "require('+ selectedImage + ')";
-  // console.log(selectedImage)
-
+  const myaccounset = (name, text) => {
+    setMyaccount(text);
+  };
   const setInputValue = (name, text) => {
     setPaid_amount(text);
   };
 
   const makeTheCall = () => {
-    if(depositValue !== "" && bank !==""){
-      let newDate = new Date();
-      let date = newDate.getDate();
-      let month = newDate.getMonth() + 1;
-      let year = newDate.getFullYear();
-      let _date = newDate;
-      let day = _date.toLocaleString("en-us", { weekday: "long" });
-      const currTime = newDate.toLocaleTimeString();
-  
-      const originalArray = data.data;
-      const newArray = originalArray.filter((item) => item.quantity > 0);
-      let subtotal = 0;
-      let tax = 0;
-      newArray.map((data) => {
-        subtotal = subtotal + data.price;
-      });
-  
-      tax =  0//Math.round((subtotal * 15) / 100);
-  
-      const _data = {
-        date: currTime + "," + day + "," + date + "/" + month + "/" + year,
-        date_use : mydate,
-        time : currTime ,
-        // id: 100,
-        items: newArray,
-        deposit : depositValue,
-        // order: "#113D34CAG",
-        status: parseFloat(total) == parseFloat(paid_amount) ?  "Paid" : "Prtly Paid",
-        subtotal: subtotal,
-        tax: tax,
-        paid_amount : paid_amount,
-        total: subtotal + tax,
-        page_status : 0
-      };
-      //
-      // let active = [
-      //   {
-      //     id: 1,
-      //     order: "#113D34C",
-      //     subtotal: subtotal,
-      //     tax: tax,
-      //     total: subtotal + tax,
-      //     status: parseFloat(total) == parseFloat(paid_amount) ?  "Paid" : "Prtly Paid",
-      //     date: currTime + "," + day + "," + date + "/" + month + "/" + year,
-      //     items: newArray,
-      //   },
-      // ];
-  
-      // // temporary
-      // dispatch(activeOrder(active));
-      //
-      dispatch(storeOrder(_data));
-      dispatch(storeImage(selectedImage[0]))
-      router.push("screen/orderDetails/OrderDetails");
+    const __payment = Number(totalPaid) + Number(paid_amount);
+    if (Number(paid_amount) == 0) alert("O amount is not allowed");
+    else if (__payment > total) alert("Amount is too large");
+    else if(myaccount== "") alert("Enter a/c");
+    else {
+      if (depositValue !== "" && bank !== "") {
+        let newDate = new Date();
+        let date = newDate.getDate();
+        let month = newDate.getMonth() + 1;
+        let year = newDate.getFullYear();
+        let _date = newDate;
+        let day = _date.toLocaleString("en-us", { weekday: "long" });
+        const currTime = newDate.toLocaleTimeString();
+
+        const originalArray = data.data;
+        const newArray = data.data.is_previous
+          ? originalArray.items
+          : originalArray.filter((item) => item.quantity > 0);
+        let subtotal = data.data.is_previous ? data.data.total : 0;
+        let tax = 0;
+        !data.data.is_previous &&
+          newArray.map((data) => {
+            subtotal = subtotal + data.price;
+          });
+
+        tax = 0; //Math.round((subtotal * 15) / 100);
+
+        const _data = {
+          date: currTime + "," + day + "," + date + "/" + month + "/" + year,
+          date_use: mydate,
+          time: currTime,
+          items: newArray,
+          deposit: depositValue,
+          status:
+            parseFloat(total) == parseFloat(paid_amount)
+              ? "Paid"
+              : "Prtly Paid",
+          subtotal: subtotal,
+          tax: tax,
+          paid_amount: paid_amount,
+          total: subtotal + tax,
+          page_status: 0,
+          order: data.data?.order,
+          payment_Entry: data.data?.payment_Entry,
+          is_previous: false,
+          bank: bank,
+          myaccount: myaccount,
+          warehouse: warehouse,
+        };
+
+        dispatch(storeOrder(_data));
+        dispatch(storeImage(selectedImage[0]));
+        router.push("screen/orderDetails/OrderDetails");
+      } else {
+        alert("All fields must be filled");
+      }
     }
-    else{
-      alert("All fields must be filled")
-    }
-    
   };
 
-  const handleToast = (data) => {
-    if (!toast.isActive(toastId)) {
-      showNewToast(data);
-    }
-  };
   const showNewToast = (data) => {
     const newId = Math.random();
     setToastId(newId);
@@ -186,7 +197,6 @@ export default function UploadScreen() {
       duration: 2000,
       containerStyle: {
         backgroundColor: "transoparent",
-        // color: "red",
       },
       render: ({ id }) => {
         const uniqueToastId = "toast-" + id;
@@ -200,38 +210,35 @@ export default function UploadScreen() {
     });
   };
 
-  const selectedValue = (a,e)=>{
-    setBank(e)
-    console.log("==")
-  }
+  const selectedValue = (a) => {
+    console.log(a);
+    setBank(a);
+  };
 
-  const setDepositVal= (a,e)=>{
-      console.log(e)
-      setDepositValue(e)
-  }
-
-  // console.log(selectedImage)
+  const setDepositVal = (a, e) => {
+    setDepositValue(e);
+  };
 
   return (
-    <>
-      <ScrollView style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={100}
+    >
+      <ScrollView>
         <View style={styles.rootCard}>
           <View style={styles.containerCard}>
             <Card style={styles.imageCard}>
-            {
-              selectedImage.length == 0 &&
-              <Text>{i18n.t("Image")} : </Text>
-            }
-              
-              {selectedImage.length >0  && (
-                selectedImage.map((data,index)=>(
-                  <Image key={index} source={{ uri: data }} style={styles.image} />
-                )
-                )
-                
-              )}
+              {selectedImage.length == 0 && <Text>{i18n.t("Image")} : </Text>}
 
-              {/* <Text>Size</Text> */}
+              {selectedImage.length > 0 &&
+                selectedImage.map((data, index) => (
+                  <Image
+                    key={index}
+                    source={{ uri: data }}
+                    style={styles.image}
+                  />
+                ))}
             </Card>
             <ButtonBox
               width={(width * 90) / 100}
@@ -247,15 +254,23 @@ export default function UploadScreen() {
               fontColor={"#fff"}
             />
           </View>
-          <View style={styles.bankInfo}>
-            {/* <Text size="lg">Payment Information</Text> */}
+          <View style={styles.bankInfo}></View>
+          <View style={styles.body}>
+            <InputBox
+              isLabel={true}
+              labelSize={"sm"}
+              label={"Payment Account"}
+              borderRadius={8}
+              placeholder={"a/c"}
+              setInputValue={myaccounset}
+              height={45}
+            />
           </View>
           <View style={styles.body}>
-            {/* <Text size="sm">Payment Amount</Text> */}
             <InputBox
-            isLabel={true}
-            labelSize={"sm"}
-            label={"Payment Amount"}
+              isLabel={true}
+              labelSize={"sm"}
+              label={"Payment Amount"}
               borderRadius={8}
               value={paid_amount.toString()}
               setInputValue={setInputValue}
@@ -264,36 +279,34 @@ export default function UploadScreen() {
           </View>
           <View style={styles.body}>
             <Text size="sm">Payment Method</Text>
-            <SelectBox 
-            // placeholder={i18n.t("Select_Option")} 
-            // placeholder={"Ware Transfer"}
-            defaultValue="Ware Transfer"
-            height={40} 
-            data={payment_method}
-            selectedValue={selectedValue}
+            <SelectBox
+              defaultValue="Bank Deposit"
+              height={40}
+              data={payment_method}
+              selectedValue={selectedValue}
+            />
+          </View>
+          <View style={styles.body}>
+            <InputBox
+              name="deposit"
+              placeholder={"Deposit reference"}
+              isLabel={true}
+              labelSize={"sm"}
+              label={"Deposit Reference"}
+              borderRadius={8}
+              height={50}
+              setInputValue={setDepositVal}
             />
           </View>
           <View style={styles.body}>
             <Text size="sm">{i18n.t("Bank_Account")}</Text>
-            <SelectBox placeholder={i18n.t("Select_Option")} height={40} 
-            data={bank_account}
-            selectedValue={selectedValue}
+            <SelectBox
+              placeholder={i18n.t("Select_Option")}
+              height={40}
+              data={bank_account}
+              selectedValue={selectedValue}
             />
           </View>
-          <View style={styles.body}>
-            <InputBox 
-            name="deposit"
-            isLabel={true}
-            labelSize={"sm"}
-            label={"Deposit Reference"}
-            borderRadius={8}
-            height={50}
-            setInputValue={setDepositVal}
-            />
-            {/* setInputValue={setInputValue} */}
-          </View>
-
-          
         </View>
       </ScrollView>
 
@@ -308,12 +321,11 @@ export default function UploadScreen() {
             width={(width * 35) / 100}
             borderRadius={10}
             onClick={makeTheCall}
-            // onClick={save}
             fontColor={"#fff"}
           />
         </Card>
       </View>
-    </>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -326,7 +338,7 @@ const styles = StyleSheet.create({
     marginHorizontal: (width * 6) / 100,
   },
   containerCard: {
-    height: 'auto',
+    height: "auto",
     marginVertical: 10,
     justifyContent: "space-between",
     alignItems: "center",
@@ -335,8 +347,8 @@ const styles = StyleSheet.create({
     width: (width * 70) / 100,
     flexDirection: "column",
     justifyContent: "space-between",
-    height : 'auto',
-    alignItems : 'center'
+    height: "auto",
+    alignItems: "center",
   },
   bankInfo: {
     marginVertical: 10,
@@ -344,23 +356,20 @@ const styles = StyleSheet.create({
   body: {
     marginVertical: 10,
     height: 80,
-    // backgroundColor : 'red',
     justifyContent: "space-between",
   },
   summery: {
-    height: (height*10)/100,
+    height: (height * 10) / 100,
     flexDirection: "row",
     justifyContent: "space-around",
-    // alignItems: "center",
   },
   total: {
-    // fontSize : 19,
     letterSpacing: 1.5,
   },
   image: {
-    width: '90%',
+    width: "90%",
     height: 100,
     borderRadius: 8,
-    marginVertical : 5
+    marginVertical: 5,
   },
 });

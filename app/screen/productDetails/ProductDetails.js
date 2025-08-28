@@ -49,19 +49,19 @@ export default function ProductDetails() {
   const [value, setValue] = useState("1");
   const [basePrice, setBasePrice] = useState(0);
 
-  console.log("hello" + JSON.stringify(data));
 
   useEffect(() => {
     setBasePrice(data?.price);
   }, []);
+
 
   const positiveCalled = () => {
     if (parseInt(value) >= 1) {
       setValue(parseInt(value) + 1);
       setData({
         ...data,
-        price: parseInt(basePrice) * (parseInt(value) + 1),
-        basePrice: basePrice,
+        price:parseInt(data.after_discount) * (parseInt(value) + 1),
+        basePrice: parseInt(data?.price) +  parseInt(data.after_discount) * (parseInt(value) + 1),
         quantity: parseInt(value) + 1,
       });
     }
@@ -80,16 +80,16 @@ export default function ProductDetails() {
   };
 
   const _addtocart = () => {
-    console.log(data.quantity);
     if (data.quantity == 0) {
       const _data = {
         ...data,
-        basePrice: basePrice,
+        basePrice: parseInt(data.after_discount),
         quantity: 1,
       };
       dispatch(addToCompare(_data));
       router.push("/(drawer)/(tabs)/cart");
     } else {
+      
       dispatch(addToCompare(data));
       router.push("/(drawer)/(tabs)/cart");
     }
@@ -221,26 +221,32 @@ export default function ProductDetails() {
         // backgroundColor  :'yellow'
       }}>
             {/* <P style={{ textDecoration: 'line-through' }}>Strikethrough text</P> */}
-        <Card style={styles.desCard}>
-          <View style={styles.inside}>
-            <View>
-              <Text size="md">Total Price</Text>
+        <Card style={{
+          // backgroundColor : 'green',
+          flexDirection : 'row',
+          justifyContent : 'space-between'
+        }}>
+          {/* <View > */}
+            {/* <View > */}
+              <Text size="lg">Total Price</Text>
+              <View>
               <Text size="sm"  style={{
                 textDecorationLine : 'line-through'
               }}>Tk {data.basePrice}
               </Text>
               <Text size="lg" bold >Tk {data.after_discount}
               </Text>
-            </View>
-            <View
+              </View>
+            {/* </View> */}
+            {/* <View
               style={{
                 width: "75%",
                 flexDirection: "row",
                 justifyContent: "flex-end",
                 alignItems: "center"
               }}
-            >
-              <ButtonBox
+            > */}
+              {/* <ButtonBox
                 isIcon={true}
                 text=""
                 action="default"
@@ -270,12 +276,12 @@ export default function ProductDetails() {
                 icon={AddIcon}
                 onClick={positiveCalled}
                 color="green"
-              />
-            </View>
-            <View></View>
-          </View>
+              /> */}
+            {/* </View> */}
+            {/* <View></View> */}
+          {/* </View> */}
         </Card>
-        <Card style={styles.cart}>
+        {/* <Card style={styles.cart}>
           <ButtonBox
           variant={"link"}
             text="Add To Cart"
@@ -285,7 +291,7 @@ export default function ProductDetails() {
             onClick={_addtocart}
             fontColor="#fff"
           />
-        </Card>
+        </Card> */}
       </View>
     </View>
   );
@@ -324,7 +330,7 @@ const styles = StyleSheet.create({
   },
   cart: {
     // height :  60,
-    backgroundColor : 'red',
+    backgroundColor : '#fff',
     width: width,
     justifyContent: "center",
     alignItems: "center",

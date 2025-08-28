@@ -22,7 +22,7 @@ export const i18n = new I18n({
   Bank_Information : "Payment Information",
   Bank_Information : "Bank Information",
   User_Account : "User Account",
-  Bank_Account : "Bank Account",
+  Bank_Account : "Petromax Bank Account",
   Add_Attachment : "Add Attachment",
   Select_Option : "Select Option",
   Image : "Image"

@@ -1,9 +1,10 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, TouchableOpacity } from "react-native";
 import React,{useState} from "react";
 import { useDispatch,useSelector } from "react-redux";
 import { Card, Icon, CalendarDaysIcon, Switch ,Text,PlayIcon} from "@gluestack-ui/themed";
 import SelectBox from "../component/select/SelectBox";
 import { setLanguage, setLanguageName } from "../redux/slices/loginSlice";
+import { router } from "expo-router";
 
 const data = [
   {
@@ -11,11 +12,11 @@ const data = [
     value : "0",
     name : "English"
   },
-  {
-    id :  2 , 
-    value : "1",
-    name : "Bangla"
-  }
+  // {
+  //   id :  2 , 
+  //   value : "1",
+  //   name : "Bangla"
+  // }
 ]
 
 export default function settings() {
@@ -30,6 +31,11 @@ export default function settings() {
     // dispatch(setLanguage(parseInt(value)))
     // dispatch(setLanguageName(name))
   }
+
+  const _policy = (_link) =>{
+    router.push(_link)
+  }
+
 
   return (
     <View style={styles.container}>
@@ -54,7 +60,7 @@ export default function settings() {
             App Setting{" "}
           </Text>
         </View>
-        <View style={styles.innerBody}>
+        {/* <View style={styles.innerBody}>
           <Text size="md"> Push Notification</Text>
           <Switch
             size="sm"
@@ -67,7 +73,7 @@ export default function settings() {
             activeThumbColor={"yellow"}
             ios_backgroundColor={"lightgray"}
           />
-        </View>
+        </View> */}
         <View style={styles.innerBody}>
           <Text size="md"> Language </Text>
           <SelectBox 
@@ -106,18 +112,18 @@ export default function settings() {
             Help and Terms of Service{" "}
           </Text>
         </View>
-        <View style={styles.innerBody}>
+        <TouchableOpacity style={styles.innerBody} onPress={()=>_policy("screen/policy/PrivatePolicy")}>
           <Text size="md"> Private policy</Text>
           
-        </View>
-        <View style={styles.innerBody}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.innerBody} onPress={()=>_policy('screen/services/Services')}>
           <Text size="md"> Terms of service </Text>
           
-        </View>
-        <View style={styles.innerBody}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.innerBody} onPress={()=>_policy('screen/support/Support')}>
           <Text size="md"> Contact support </Text>
           
-        </View>
+        </TouchableOpacity>
       </Card>
     </View>
   );

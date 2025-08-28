@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "patromax",
+    "name": "petromax",
     "slug": "patromax_2",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -16,6 +16,7 @@
       "**/*"
     ],
     "ios": {
+      "buildNumber": "2",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.patromax-2"
     },
@@ -42,7 +43,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "3aa7203a-8287-4c8e-ba43-c4dadd8bb527"
+        "projectId": "1c6eb8fa-d109-4665-b308-bfe87567e985"
       }
     }
   }

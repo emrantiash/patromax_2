@@ -19,13 +19,14 @@ const _horizontal = (windowWidth * 2) / 100;
 const _variant = "elevated";
 
 
-export default function Active({status,order,total,items,date,dataset,action }) {
+export default function Active({status,order,total,items,date,dataset,action,amount }) {
   const dispatch = useDispatch()
   const makeTheCall =(data) =>{
 
     let _data = {
       ...data ,
-      page_status : 1
+      page_status : 1,
+      is_previous : true
     }
 
     // console.log(data)
@@ -84,14 +85,14 @@ export default function Active({status,order,total,items,date,dataset,action }) 
             flexDirection : 'column',
             justifyContent : 'space-between'
           }}>
-          <Text size="xs" color="gray">Latest Status</Text>
-        <Text size="sm">{date}</Text>
+          <Text size="xs" color="gray">Payments</Text>
+        <Text size="sm">{status + ' ' + 'payments'}  </Text>
 
           </View>
          <View style={{
           marginTop : (windowHeight*1)/100 
          }}>
-         <BadgeSymbol  text={status} action={action}  />
+         <BadgeSymbol  text={amount} action={action}  />
          </View>
             
         </View>

@@ -41,7 +41,7 @@ const __selectdata = [
 
 export default function Page() {
   const config = useConfig();
-  console.log(config[2]);
+  // console.log(config[2]);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [status,setStatus] = useState("")
@@ -58,7 +58,7 @@ export default function Page() {
   const getDataCall = (option) => {
     setIsLoading(true)
     dispatch(getHistory(option)).then(function (e) {
-      console.log(JSON.stringify(e.payload.message));
+      console.log("====history ==="+JSON.stringify(e.payload.message));
       setData(e?.payload.message);
       setIsLoading(false)
     });
@@ -84,6 +84,16 @@ export default function Page() {
     };
     getDataCall(option);
   };
+
+  const calculate_payment = (data) =>{
+    let __amount = 0 
+    data.map((data)=>{
+      __amount = data.amount + __amount
+    })
+    return __amount
+  }
+
+ 
 
   return (
     <View style={styles.container}>
@@ -131,6 +141,8 @@ export default function Page() {
             date={item.date}
             dataset={item}
             action={item.status=="Paid" ?"success" : item.status=="Unpaid" ? "error" : "warning"}
+            // amount={calculate_payment(item.payment_Entry)}
+            amount = {item.petromax_status || "Order Created"}
           />
         )}
         keyExtractor={(item) => item.id}

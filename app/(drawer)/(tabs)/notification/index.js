@@ -1,4 +1,4 @@
-import { StyleSheet, View, Button, Dimensions, FlatList } from "react-native";
+import { StyleSheet, View, Button, Dimensions, FlatList,RefreshControl } from "react-native";
 import {
   Card,
   Text,
@@ -19,38 +19,11 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ImageItem from "../../../component/image/ImageItem";
 import { getNotification } from "../../../redux/slices/historySlice";
+import PSpinner from "../../../component/spinner/Spinner";
 import useConfig from "../../../lib/hook/config";
 
 const width = Dimensions.get("window").width;
 
-// import "../../../../assets/images/logo.png"
-
-// const notification = [
-//   {
-//     id: 1,
-//     order: "123D34E",
-//     date: "6:25pm",
-//     status : "cancelled"
-//   },
-//   {
-//     id: 2,
-//     order: "123D34E",
-//     date: "6:25pm",
-//     status : "delivered"
-//   },
-//   {
-//     id: 3,
-//     order: "123D30E",
-//     date: "6:25pm",
-//     status : "Approaved"
-//   },
-//   {
-//     id: 4,
-//     order: "123D35E",
-//     date: "6:25pm",
-//     status : "deleivered"
-//   },
-// ];
 
 export function NotificationCard({ order, time, status }) {
  
@@ -71,7 +44,7 @@ export function NotificationCard({ order, time, status }) {
               width: (width * 70) / 100,
             }}
           >
-            Your Order ({order}) has been {status}
+            Your Order ({order}) has been chenged to {status}
           </Text>
           <Text size="sm">{time}</Text>
         </View>
@@ -83,29 +56,78 @@ export function NotificationCard({ order, time, status }) {
 export default function Page() {
   const dispatch = useDispatch();
   const config = useConfig();
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [data, setData] = useState([]);
 
-  useEffect(() => {
+  const makeTheCall = ()=>{
     const option = {
-      customer:  config[2],
+      customer: config[2],
+      latest_per_order: 0,
+      limit: 1000,
     };
+    setIsLoading(true)  
     dispatch(getNotification(option)).then(function(e){
-      setData(e?.payload.message);
+      setData(e.payload.message.changes);
+      setIsLoading(false)
     })
+  }
+
+  useEffect(() => {
+    
+    
+    makeTheCall()
    
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    // Your data fetching or update logic here
+    // Example: await fetchData();
+    makeTheCall()
+    setRefreshing(false);
+};
   return (
     <View style={styles.container}>
       <FlatList
+      ListEmptyComponent={() => (
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            margin: 10,
+            padding: 10,
+          }}
+        >
+          {isLoading ? (
+            <PSpinner />
+          ) : (
+            <Text
+              style={{
+                fontSize: 12,
+                letterSpacing: 1.0,
+              }}
+            >
+              No Item Found
+            </Text>
+          )}
+        </View>
+      )}
         data={data}
         renderItem={({ item }) => (
           <NotificationCard
-            order={item.order}
+            order={item.sales_order}
             time={item.date}
-            status={item.status}
+            status={item.current_status}
           />
         )}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+          />
+      }
         //     ListHeaderComponent = {() => (
         //       <Text style={styles.text}>{i18n.t('Active')} {i18n.t('Orders')}</Text>
         //   )}

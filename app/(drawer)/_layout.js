@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image,Dimensions } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect ,useRef } from "react";
 import { useDispatch,useSelector } from "react-redux";
 import { signout } from "../redux/slices/loginSlice";
 import { Drawer } from "expo-router/drawer";
@@ -44,7 +44,7 @@ const CustomDrawerContent = (props) => {
     >
       <View style={styles.userInfoWrapper}>
         <Image
-          source={{ uri: "https://randomuser.me/api/portraits/women/26.jpg" }}
+          source={{ uri: "https://petromax-test.s3.ap-south-1.amazonaws.com/307ce493-b254-4b2d-8ba4-d12c080d6651+1.png" }}
           width={80}
           height={80}
           style={styles.userImg}
@@ -88,7 +88,7 @@ const CustomDrawerContent = (props) => {
           router.push("/favourites");
         }}
       /> */}
-      <DrawerItem
+      {/* <DrawerItem
         icon={({ color, size }) => (
           <MaterialIcons name="account-circle" size={image_size} color={pathname == "/profile" ? "#fff" : "#DF2B2A"} />
         )}
@@ -103,7 +103,7 @@ const CustomDrawerContent = (props) => {
           router.push("/profile/");
         }}
         
-      />
+      /> */}
       {/* <DrawerItem
         icon={({ color, size }) => (
           <MaterialCommunityIcons name="order-numeric-descending" size={24} color="black" />
@@ -211,7 +211,7 @@ export default function Layout() {
        <Drawer.Screen name="profile" options={{headerShown: true,title : "Profile"}} />
       <Drawer.Screen name="favourites" options={{headerShown: true,title : "Statement"}} />
       <Drawer.Screen name="settings" options={{headerShown: true,title : "Setting"}} />
-      {/* <Drawer.Screen name="logout" options={{headerShown: true}} /> */}
+      <Drawer.Screen name="logout" options={{headerShown: true}} />
     </Drawer>
   );
 }

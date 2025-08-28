@@ -17,7 +17,7 @@ const _width = Dimensions.get('window').width
 
 
 
-export default function SelectBox({placeholder,data,selectedValue,height ,width,defaultValue}) {
+export default function SelectBox({placeholder,data,selectedValue,height ,width,defaultValue,borderColor}) {
 
   return (
     <Select 
@@ -35,8 +35,8 @@ export default function SelectBox({placeholder,data,selectedValue,height ,width,
         height : height,
         width  : width,
         padding :  (_width * 2 )/100,
-        fontSize : 12
-        // borderColor : '#fff'
+        fontSize : 12,
+        borderColor : borderColor ?  borderColor : 'lightgray'
       }}>
         <SelectInput placeholder={placeholder} />
         <SelectIcon className="mr-3" as={ChevronDownIcon} />

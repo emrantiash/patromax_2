@@ -6,16 +6,21 @@ import {
   Dimensions,
   TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import BadgeSymbol from "../../component/badge/Badge";
 import {
   Card,
   Text,
   Icon,
   ArrowRightIcon,
   Divider,
+  Progress,
+  ProgressFilledTrack,
+  Badge,
 } from "@gluestack-ui/themed";
 import {
+  setDataStore,
   storeTotal,
   postOrder,
   submitOrder,
@@ -26,11 +31,9 @@ import {
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import Entypo from "@expo/vector-icons/Entypo";
-import BadgeSymbol from "../../component/badge/Badge";
 import { router } from "expo-router";
 import ButtonBox from "../../component/button/Button";
 import useConfig from "../../lib/hook/config";
-import PSpinner from "../../component/spinner/Spinner";
 import * as Clipboard from "expo-clipboard";
 
 const height = Dimensions.get("window").height;
@@ -41,6 +44,7 @@ export default function OrderDetails() {
   const dispatch = useDispatch();
   const data = useSelector((state) => state.orderReducer.data);
   const image = useSelector((state) => state.cartReducer.image);
+  // const warehouse = useSelector((state) => state.productReducer.warehouse);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedText, setCopiedText] = useState("");
@@ -50,18 +54,17 @@ export default function OrderDetails() {
   };
 
   const makeCallPayment = () => {
-    // console.log(data?.due?.toString());
+    data.is_previous && dispatch(setDataStore(data));
     dispatch(storeTotal(data?.due?.toString() > 0 ? data?.due : data.total));
     router.push("screen/uploadScreen/UploadScreen");
   };
 
+  console.log("Order Details ==="+JSON.stringify(data))
+
   const call_sales_order = () => {
     setIsLoading(true);
-    // console.log("==sales order comes ====");
-    // console.log(data);
-    // // console.log(data)
-
     const thisdata = {
+      custom_delivery_point_2: data.warehouse,
       docstatus: 0,
       name: "new-sales-order-item-jhugcvdhfs",
       doctype: "Sales Order",
@@ -84,7 +87,6 @@ export default function OrderDetails() {
         ..._data,
         docstatus: 0,
         doctype: "Sales Order Item",
-        // name: "new-sales-order-item-jhugcvdhfs",
         __islocal: 1,
         __unsaved: 1,
         owner: "Administrator",
@@ -100,29 +102,12 @@ export default function OrderDetails() {
         against_blanket_order: null,
         page_break: 0,
         cost_center: "Main - PM",
-        // parent: "new-sales-order-wnymarxygf",
         parentfield: "items",
         parenttype: "Sales Order",
         idx: 1,
         qty: _data.quantity,
         conversion_factor: 1,
         stock_qty: 1,
-        // price_list_rate: _data.price,
-        // base_price_list_rate: _data.basePrice,
-        // margin_rate_or_amount: 0,
-        // rate_with_margin: 0,
-        // discount_amount: 65,
-        // distributed_discount_amount: 0,
-        // base_rate_with_margin: 0,
-        // rate: _data.basePrice,
-        // amount: _data.price,
-        // base_rate: _data.basePrice,
-        // base_amount: _data.basePrice,
-        // stock_uom_rate: _data.basePrice,
-        // net_rate: _data.price,
-        // net_amount: _data.price,
-        // base_net_rate: _data.basePrice,
-        // base_net_amount: _data.price,
         billed_amt: 0,
         valuation_rate: 0,
         gross_profit: 0,
@@ -143,9 +128,7 @@ export default function OrderDetails() {
         item_code: _data.item,
         weight_uom: null,
         barcode: null,
-        // pricing_rules: '[\n "PRLE-0002"\n]',
         item_name: _data.name,
-        // description: "",
         image: _data.image,
         warehouse: "Stores - PM",
         income_account: "Sales - PM",
@@ -171,7 +154,6 @@ export default function OrderDetails() {
         customer_item_code: null,
         has_margin: true,
         free_item_data: [],
-        // child_docname: "new-sales-order-item-jhugcvdhfs",
         validate_applied_rule: 0,
         price_or_product_discount: "Price",
         pricing_rule_for: "Discount Percentage",
@@ -197,23 +179,13 @@ export default function OrderDetails() {
       plc_conversion_rate: 1,
       company_address: null,
       company_address_display: null,
-      // base_net_total: data.total,
-      // net_total: data.total,
-      // base_total: data.total,
-      // total: data.total,
       total_qty: 1,
-      // grand_total: data.total,
-      // base_grand_total: data.total,
       total_taxes_and_charges: 0,
       base_total_taxes_and_charges: 0,
-      // rounded_total: data.total,
       rounding_adjustment: 0,
       base_rounding_adjustment: 0,
-      // base_rounded_total: data.total,
       in_words: "",
       base_in_words: "",
-      // base_discount_amount: 0,
-      // amount_eligible_for_commission: data.total,
       total_commission: null,
       tax_id: null,
       customer_name: config[2],
@@ -229,22 +201,21 @@ export default function OrderDetails() {
       contact_email: null,
       contact_mobile: null,
       contact_phone: null,
-      // customer_group: "Gold (5% Discount)",
       territory: null,
       language: "en",
       payment_terms_template: null,
       total_net_weight: 0,
     };
-    // console.log(thisdata)
     const option = { doc: JSON.stringify(thisdata), action: "Save" };
 
+    // console.log("===the option is ==",option)
+
     dispatch(postOrder(option)).then(function (e) {
-      console.log(e.payload.docs[0].name);
-      e.payload.docs[0].name
-        ? (_confirm(e.payload.docs[0].name)
-          // console.log("===sales order created===")
-          )
-        : console.log("Something went wrong with order save");
+      // console.log("===the sales order  ==",e.payload)
+      e?.payload?.docs[0]?.name
+        ? _confirm(e.payload.docs[0].name)
+        : // ("===sales order created===")
+          console.log("Something went wrong with order save");
     });
   };
 
@@ -256,24 +227,32 @@ export default function OrderDetails() {
     const option = [tail, _data];
 
     dispatch(submitOrder(option)).then(function (e) {
-      // console.log("==the paid amount is ==", data)
-      data.paid_amount == 0 ? salesInvoice( " " , e.payload.data.name) :
-      e.payload.data.name
-        ? (payment(e.payload.data.name)
-          // console.log("==sales order confirmed==")
-          )
-        : console.log("Something went wrong with order submit ");
+      data.paid_amount == 0
+        ? // salesInvoice(" ", e.payload.data.name)
+          makeTheCall()
+        : e.payload.data.name
+        ? payment(e.payload.data.name)
+        : // console.log("==sales order confirmed==")
+          alert("Something went wrong with order submit ");
     });
   };
 
+
   const payment = (reference_name) => {
-    // console.log("==payment ===come===", reference_name, data.total);
-    // console.log(reference_name)
-    // console.log(mydate)
+    data.order && setIsLoading(true);
+    // console.log("====payment called====", data);
     const thisdata = {
+      // bank
+      bank: data.bank.split(":")[0],
+      bank_account: data.bank.split(":")[1],
+      paid_to: "Bank Account - PM",
+      paid_to_account_type: "Bank",
+      mode_of_payment: "Wire Transfer",
+      custom_from_account: data.myaccount,
+
       reference_no: data.deposit,
       reference_date: data.date_use,
-      owner: "Administrator",
+      // owner: "Administrator",
       docstatus: 0,
       idx: 0,
       naming_series: "ACC-PAY-.YYYY.-",
@@ -291,8 +270,8 @@ export default function OrderDetails() {
       paid_from_account_type: "Receivable",
       paid_from_account_currency: "BDT",
       paid_from_account_balance: Number(data.paid_amount),
-      paid_to: "Cash - PM",
-      paid_to_account_type: "Cash",
+        // paid_to: "Cash - PM",
+         // paid_to_account_type: "Cash",
       paid_to_account_currency: "BDT",
       paid_to_account_balance: Number(data.paid_amount),
       paid_amount: Number(data.paid_amount),
@@ -313,7 +292,7 @@ export default function OrderDetails() {
       base_total_taxes_and_charges: 0,
       total_taxes_and_charges: 0,
       reference_date: data.date_use,
-      status: "Draft",
+      // status: "Draft",
       custom_remarks: 0,
       is_opening: "No",
       doctype: "Payment Entry",
@@ -322,7 +301,7 @@ export default function OrderDetails() {
           docstatus: 0,
           idx: 1,
           reference_doctype: "Sales Order",
-          reference_name: reference_name,
+          reference_name: reference_name.replace("#", ""),
           payment_term_outstanding: 0,
           total_amount: data.total,
           outstanding_amount: data.total,
@@ -344,38 +323,38 @@ export default function OrderDetails() {
       __islocal: 1,
       __unsaved: 1,
       name: "new-payment-entry-yzskdlfzhq",
-      __last_sync_on: "2025-07-09T11:27:15.065Z",
-      mode_of_payment: "Cash",
+      // __last_sync_on: "2025-07-09T11:27:15.065Z",
+      // mode_of_payment: "Cash",
     };
 
-    // console.log("====this data ===="+JSON.stringify(thisdata))
     const option = { doc: JSON.stringify(thisdata), action: "Save" };
 
     dispatch(postOrder(option)).then(function (e) {
-      // console.log(JSON.stringify(e.payload));
+      // console.log(e.payload);
       if (e.payload.docs[0].name) {
         const name = e.payload.docs[0].name;
-        console.log(image)
-        if(image){
+        // console.log(image);
+        if (image) {
           let formData = new FormData();
-          // let filename = image.split('/').pop();
           let match = /\.(\w+)$/.exec(image);
           let type = match ? `image/${match[1]}` : `image`;
-          formData.append('file', {
+          formData.append("file", {
             uri: image,
-            name: e.payload.docs[0].name+'upload.jpg',
-            type: type ||  'image/jpeg',
+            name: e.payload.docs[0].name + "upload.jpg",
+            type: type || "image/jpeg",
           });
           formData.append("is_private", "1");
           formData.append("folder", "Home");
           formData.append("doctype", "Payment Entry");
           formData.append("docname", e.payload.docs[0].name);
-          
-          dispatch(image_upload(formData)).then(function (e) {
-            // console.log("image uploaded");
-          });
+
+          dispatch(image_upload(formData)); // image upload
+
+          // dispatch(image_upload(formData)).then(function (e) {
+          //   //("image uploaded");
+          // });
         }
-        
+
         const tail = "/" + name;
         const data = {
           docstatus: 1,
@@ -383,265 +362,95 @@ export default function OrderDetails() {
         const option = [tail, data];
 
         dispatch(submitPayment(option)).then(function (e) {
-          // console.log("===submit paymenty ===", e.payload.data.name);
+          // ("===submit paymenty ===", e.payload.data.name);
           if (e.payload.data.name) {
-           
-            salesInvoice(e.payload.data.name, reference_name);
-          } else handleToast("Something went wrong with payment submit");
+            makeTheCall();
+            // salesInvoice(e.payload.data.name, reference_name);
+          } else alert("Something went wrong with payment submit");
         });
-      } else handleToast("Something went wrong with payment save");
-    });
-  };
-
-  const salesInvoice = (payment_name, sales_order) => {
-    // console.log("sales invoice comes", sales_order, payment_name);
-
-    let thisdata = {
-      owner: "Administrator",
-      docstatus: 0,
-      idx: 0,
-      naming_series: "ACC-SINV-.YYYY.-",
-      customer: config[2],
-      customer_name: config[2],
-      company: "Petromax",
-      posting_date: data.date_use,
-      posting_time: data.time,
-      set_posting_time: 0,
-      due_date: "2026-07-09",
-      is_pos: 0,
-      is_consolidated: 0,
-      is_return: 0,
-      update_outstanding_for_self: 1,
-      update_billed_amount_in_sales_order: 0,
-      update_billed_amount_in_delivery_note: 1,
-      is_debit_note: 0,
-      currency: "BDT",
-      conversion_rate: 1,
-      selling_price_list: "Standard Selling",
-      price_list_currency: "BDT",
-      plc_conversion_rate: 1,
-      ignore_pricing_rule: 0,
-      update_stock: 0,
-      total_qty: 1,
-      total_net_weight: 0,
-      // base_total: data.total,
-      // base_net_total: data.total,
-      // total: data.total,
-      // net_total: data.total,
-      // tax_category: "",
-      // base_total_taxes_and_charges: 0,
-      // total_taxes_and_charges: 0,
-      // base_grand_total: data.total,
-      // base_rounding_adjustment: 0,
-      // base_rounded_total: data.total,
-      // base_in_words: "",
-      // grand_total: data.total,
-      // rounding_adjustment: 0,
-      // use_company_roundoff_cost_center: 0,
-      // rounded_total: data.total,
-      // in_words: "",
-      // total_advance: 0,
-      // outstanding_amount: 0,
-      // disable_rounded_total: 0,
-      apply_discount_on: "Grand Total",
-      base_discount_amount: 0,
-      is_cash_or_non_trade_discount: 0,
-      additional_discount_percentage: 0,
-      discount_amount: 0,
-      total_billing_hours: 0,
-      total_billing_amount: 0,
-      base_paid_amount: 0,
-      paid_amount: 0,
-      base_change_amount: 0,
-      change_amount: 0,
-      allocate_advances_automatically: 1,
-      only_include_allocated_payments: 0,
-      write_off_amount: 0,
-      base_write_off_amount: 0,
-      write_off_outstanding_amount_automatically: 0,
-      redeem_loyalty_points: 0,
-      loyalty_points: 0,
-      loyalty_amount: 0,
-      ignore_default_payment_terms_template: 0,
-      po_no: "",
-      debit_to: "Debtors - PM",
-      party_account_currency: "BDT",
-      is_opening: "No",
-      amount_eligible_for_commission: 0,
-      commission_rate: 0,
-      total_commission: 0,
-      group_same_items: 0,
-      language: "en",
-      status: "Draft",
-      // customer_group: "Gold (5% Discount)",
-      is_internal_customer: 0,
-      is_discounted: 0,
-      doctype: "Sales Invoice",
-      sales_team: [],
-      // pricing_rules: [
-      //   {
-      //     docstatus: 0,
-      //     idx: 1,
-      //     pricing_rule: "PRLE-0002",
-      //     item_code: "Propane Gas Bottle 20mm",
-      //     rule_applied: 1,
-      //     parentfield: "pricing_rules",
-      //     parenttype: "Sales Invoice",
-      //     doctype: "Pricing Rule Detail",
-      //     __islocal: 1,
-      //     parent: "new-sales-invoice-nfinkqizsv",
-      //     name: "new-pricing-rule-detail-lstldvjhof",
-      //   },
-      // ],
-      taxes: [],
-      packed_items: [],
-      advances: data.paid_amount == 0 ? [] : [
-        {
-          docstatus: 0,
-          idx: 1,
-          reference_type: "Payment Entry",
-          reference_name: payment_name ,
-          remarks: "Amount BDT ",
-          // reference_row: "d7uflpq0pn",
-          advance_amount: 0,
-          // allocated_amount: data.total - 70,
-          exchange_gain_loss: 0,
-          ref_exchange_rate: 1,
-          difference_posting_date: data.date_use,
-          // parent: "new-sales-invoice-nfinkqizsv",
-          parentfield: "advances",
-          parenttype: "Sales Invoice",
-          doctype: "Sales Invoice Advance",
-          // __islocal: 1,
-          // name: "new-sales-invoice-advance-gjofrjzsuv",
-        },
-      ],
-      payment_schedule: [],
-      items: data.items.map((_data) => ({
-        ..._data,
-
-        owner: "Administrator",
-        docstatus: 0,
-        idx: 1,
-        has_item_scanned: 0,
-        item_code: _data.item,
-        item_name: _data.name,
-        custom_capacity: 0,
-        // description: "<div><p>20mm Valve | 12kg</p></div>",
-        item_group: "Cylinder",
-        image: _data.image,
-        qty: _data.quantity,
-        stock_uom: "PCS",
-        uom: "PCS",
-        conversion_factor: 1,
-        stock_qty: 1,
-        // price_list_rate: _data.price,
-        // base_price_list_rate: _data.price,
-        margin_rate_or_amount: 0,
-        rate_with_margin: 0,
-        discount_percentage: 0,
-        discount_amount: 0,
-        distributed_discount_amount: 0,
-        base_rate_with_margin: 0,
-        // rate: _data.price,
-        // amount: _data.price,
-        // base_rate: _data.price,
-        // base_amount: _data.price,
-        // pricing_rules: '[\n "PRLE-0002"\n]',
-        stock_uom_rate: 0,
-        is_free_item: 0,
-        grant_commission: 1,
-        // net_rate: _data.price,
-        // net_amount: _data.price,
-        // base_net_rate: _data.price,
-        // base_net_amount: _data.price,
-        delivered_by_supplier: 0,
-        income_account: "Sales - PM",
-        is_fixed_asset: 0,
-        expense_account: "Cost of Goods Sold - PM",
-        enable_deferred_revenue: 0,
-        weight_per_unit: 0,
-        total_weight: 0,
-        warehouse: "Stores - PM",
-        use_serial_batch_fields: 1,
-        allow_zero_valuation_rate: 0,
-        incoming_rate: 0,
-        item_tax_rate: "{}",
-        actual_batch_qty: 0,
-        actual_qty: 0,
-        company_total_stock: 0,
-        sales_order: sales_order,
-        // so_detail: "cfhevqoj0t",
-        delivered_qty: 0,
-        cost_center: "Main - PM",
-        page_break: 0,
-        parentfield: "items",
-        parenttype: "Sales Invoice",
-        doctype: "Sales Invoice Item",
-        __islocal: 1,
-        __unsaved: 1,
-        // parent: "new-sales-invoice-nfinkqizsv",
-        // name: "new-sales-invoice-item-vdsetxzvoc",
-      })),
-      timesheets: [],
-      payments: [],
-      // __islocal: 1,
-      // __onload: {
-      //   load_after_mapping: true,
-      // },
-      __unsaved: 1,
-      // name: "new-sales-invoice-nfinkqizsv",
-      company_address: "",
-      company_address_display: "",
-    };
-    const option = { doc: JSON.stringify(thisdata), action: "Save" };
-
-    dispatch(postOrder(option)).then(function (e) {
-      // console.log("==invoice save====", JSON.stringify(e.payload.docs[0].name));
-      if (e.payload.docs[0].name) {
-        const name = e.payload.docs[0].name;
-        const tail = "/" + name;
-        const data = {
-          docstatus: 1,
-        };
-        const _option = [tail, data];
-        // console.log("===is-===" + _option);
-
-        dispatch(submitInvoice(_option)).then(function (e) {
-          // console.log("===submit invoice===",JSON.stringify(e.payload.data.name));
-          e.payload.data.name
-            ? makeTheCall()
-            : console.log("Something went wrong with sales order submit");
-        });
-      } else console.log("Something went wrong with sales order save");
+      } else alert("Something went wrong with payment save");
     });
   };
 
   const makeTheCall = () => {
-    setIsLoading(false);
-    setIsComplete(true);
+    //  setIsLoading(false);
+    incrementProgress();
+    // setIsComplete(true);
   };
 
   const goHome = () => {
     router.push("/(drawer)/(tabs)/home");
   };
+  const [progress, setProgress] = useState(0);
+
+  const incrementProgress = () => {
+    setInterval(() => {
+      setProgress((prevProgress) => {
+        const randomNumber = Math.floor(Math.random() * 20);
+        const newvalue = prevProgress + randomNumber; // Increment by 10%
+        return Math.min(newvalue, 100); // Ensure it doesn't exceed 100%
+        // return i
+      });
+      // }
+    }, 500);
+    // setIsLoading(false);
+  };
+
+  useEffect(() => {
+    progress === 100 && (setIsLoading(false), setIsComplete(true));
+  }, [progress]);
+
   return !isComplete ? (
     <>
       <ScrollView style={styles.container}>
-        {data?.page_status == 1 && (
+        {data?.order && (
           <Card style={styles.body} variant="elevated">
             <View style={styles.header}>
               <View style={styles.headerColumn}>
                 <Text size="lg" style={styles.letter}>
                   Order ID
                 </Text>
+                <View style={{
+                  width : '100%',
+                  display : 'flex',
+                  flexDirection : 'row',
+                  justifyContent : 'space-between'
+                }}>
                 <Text size="xl" style={styles.letter} bold>
                   {data.order}
                 </Text>
-              </View>
-              <TouchableOpacity onPress={() => copyToClipboard(data.order)}>
+                <TouchableOpacity onPress={() => copyToClipboard(data.order)} style={{
+                // backgroundColor : 'red',
+                display  :'flex',
+                justifyContent : 'center',
+                alignItems : 'center',
+                // height : 50
+              }}>
                 <Fontisto name="copy" size={24} color="black" />
               </TouchableOpacity>
+                </View>
+               
+              </View>
+              {/* <TouchableOpacity onPress={() => copyToClipboard(data.order)} style={{
+                // backgroundColor : 'red',
+                display  :'flex',
+                justifyContent : 'center',
+                alignItems : 'center',
+                // height : 50
+              }}>
+                <Fontisto name="copy" size={24} color="black" />
+              </TouchableOpacity> */}
+              
+            </View>
+            <View style={{
+              display : 'flex',
+              flexDirection : 'row',
+              justifyContent : 'space-between',
+              marginVertical : 10
+            }}>
+              <BadgeSymbol 
+              action={"success"}
+              text={data.petromax_status || "Order Created"}  />
             </View>
           </Card>
         )}
@@ -661,6 +470,8 @@ export default function OrderDetails() {
                   Last Update : {data.date}
                 </Text>
               )}
+              
+             {/*  */}
             </View>
           </View>
           <View style={styles.myGap}></View>
@@ -695,87 +506,162 @@ export default function OrderDetails() {
               <Text>Total</Text>
               <Text>{data.subtotal}</Text>
             </View>
-            {/* <View style={styles.subTotal}>
-              <Text> Tax</Text>
-              <Text>{data.tax}</Text>
-            </View> */}
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            ></View>
             {data.page_status == 0 && (
               <View style={styles.subTotal}>
                 <Text size="md" bold>
-                  {" "}
-                  Paid
+                  {data.order ? "Payment" : "Paid"}
                 </Text>
                 <Text bold>{data.paid_amount}</Text>
               </View>
             )}
-
-            <View style={styles.subTotal}>
-              <Text> status</Text>
-              <Text
+          </View>
+        </Card>
+        {isLoading && (
+          <Card>
+            <Progress
+              value={progress}
+              size="2xl"
+              orientation="horizontal"
+              style={{
+                borderRadius: 3,
+                backgroundColor: "#eec0c8",
+              }}
+            >
+              <ProgressFilledTrack
                 style={{
-                  marginVertical: 5,
+                  borderRadius: 3,
+                  backgroundColor: "#98FB98",
                 }}
-              >
-                <BadgeSymbol text={data.status} />
+              />
+            </Progress>
+            <View
+              style={{
+                alignItems: "center",
+              }}
+            >
+              <Text size="md">{progress + "%"}</Text>
+            </View>
+          </Card>
+        )}
+
+        {data.order && (
+          <Card style={styles.body} variant="elevated">
+            <View>
+              <Text size="sm" style={[styles.letter, styles.shipping]} bold>
+                Payment History
               </Text>
             </View>
-          </View>
-        </Card>
-        {
-          data.page_status == 1 && 
-          <Card style={styles.body} variant="elevated">
-          <View>
-            <Text size="sm" style={[styles.letter, styles.shipping]} bold>
-              Payment History
-            </Text>
-          </View>
-          {/* <View style={styles.dateBody}>
-            <Text size="sm" style={styles.letter}>
-              139,Road 10,Sector-4,Uttara ,Dhaka-1230
-            </Text>
-            <Text size="sm">Contact : 01765667656</Text>
-          </View> */}
-        </Card>
-        }
-        
+
+            {data.payment_Entry?.map((data, index) => (
+              <View style={styles.dataTable} key={index}>
+                <View
+                  style={{
+                    justifyContent: "flex-start",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <Text
+                    size="sm"
+                    color="green"
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Entypo
+                      name="dot-single"
+                      size={(height * 2) / 100}
+                      color="green"
+                    />{" "}
+                    {data.date}
+                  </Text>
+                  <Text
+                    size="xs"
+                    style={{
+                      marginHorizontal: 20,
+                    }}
+                    color="red"
+                  >
+                    {data.dep_slp}
+                  </Text>
+                </View>
+                <Text size="sm" color="green">
+                  {data.amount} Tk
+                </Text>
+              </View>
+            ))}
+          </Card>
+        )}
+
         <Card style={styles.body} variant="elevated">
           <View>
             <Text size="sm" style={[styles.letter, styles.shipping]} bold>
-              Shipping Info
+              Shipping Point
             </Text>
           </View>
           <View style={styles.dateBody}>
             <Text size="sm" style={styles.letter}>
-              139,Road 10,Sector-4,Uttara ,Dhaka-1230
+              {data.warehouse || data.delivery_point}
             </Text>
-            <Text size="sm">Contact : 01765667656</Text>
+            {/* <Text size="sm">Contact : 01765667656</Text> */}
           </View>
         </Card>
-        {isLoading && <PSpinner />}
       </ScrollView>
+      {/* {isLoading && (
+          <Card> 
+             <Progress value={progress} size="2xl" orientation="horizontal" style={{
+              borderRadius : 3,
+              backgroundColor : '#FFDCD1'
+             }}>
+              <ProgressFilledTrack  style={{
+                borderRadius : 3,
+                backgroundColor : '#DF2B2A'
+              }}/>
+            </Progress> 
+            <View style={{
+              alignItems : 'center'
+            }}>
+              <Text size="md">{progress + '%'}</Text>
+            </View> 
+          </Card>
+        )} */}
+
       <Card
         style={{
           // backgroundColor: "#DF2B2A",
           backgroundColor: "#FF7276",
         }}
       >
-        
-        {data.page_status == 0 ? (
-          <TouchableOpacity style={styles.footer} onPress={call_sales_order}>
+        {!data.is_previous ? (
+          <TouchableOpacity
+            style={styles.footer}
+            onPress={data?.order ? () => payment(data.order) : call_sales_order}
+            // disabled={isLoading}
+          >
             <Text size="lg" color="white">
               Submit
               {/* <AntDesign name="arrowright" size={12} color="red" /> */}
             </Text>
           </TouchableOpacity>
-        ) : 
-        <TouchableOpacity style={styles.footer} onPress={makeCallPayment}>
+        ) : (
+          <TouchableOpacity
+            style={styles.footer}
+            onPress={
+              // incrementProgress
+              makeCallPayment
+            }
+          >
             <Text size="lg" color="white">
               Payment
               <AntDesign name="arrowright" size={12} color="white" />
             </Text>
           </TouchableOpacity>
-        
-        }
+        )}
       </Card>
     </>
   ) : (
