@@ -22,7 +22,6 @@ const CustomDrawerContent = (props) => {
   const pathname = usePathname();
   const dispatch = useDispatch()
   const _language = useSelector((state)=>state.loginReducer.language )  ;
-  // console.log(_language)
   i18n.locale = getLocales()[_language]?.languageCode
 
   useEffect(() => {
@@ -50,7 +49,7 @@ const CustomDrawerContent = (props) => {
           style={styles.userImg}
         />
         <View style={styles.userDetailsWrapper}>
-          <Text style={styles.userName}>{config[1]?.first_name}</Text>
+          <Text style={styles.userName}>{config[1]?.first_name + ' '  + config[1]?.last_name}</Text>
           <Text style={styles.userEmail}>{config[1]?.email}</Text>
         </View>
       </View>

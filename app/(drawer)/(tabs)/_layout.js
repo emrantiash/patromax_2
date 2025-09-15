@@ -23,7 +23,6 @@ export default function _layout() {
   const config = useConfig();
   const [noti,setnoti] = useState(0)
   const _language = useSelector((state) => state.loginReducer.language);
-  // console.log(_language)
   i18n.locale = getLocales()[_language]?.languageCode;
   // const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
   useEffect(() => {
@@ -34,7 +33,6 @@ export default function _layout() {
     };
 
     dispatch(getNotification(option)).then(function (e) {
-      console.log("hello=========" + JSON.stringify(e.payload.message.changes));
       setnoti(e.payload.message.changed_sales_orders);
     });
   }, []);

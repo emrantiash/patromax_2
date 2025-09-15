@@ -17,8 +17,8 @@ export const getOtp = createAsyncThunk('get-otp', async (data) => {
 
 export const getLogin = createAsyncThunk('get-login', async (data) => {
   try {
-    // const response = await noHeaderpost(Endpoint.login, data)
-    const response = await noHeaderpost(Endpoint.varify, data)
+    // const response = await noHeaderpost(Endpoint.varify, data) // with OTP
+    const response = await noHeaderpost(Endpoint.login, data) // without OTP
     return response.data
   }
   catch (error) {
@@ -91,7 +91,7 @@ export const loginSlice = createSlice({
       state.login = action.payload.message.message == "Logged In" ? true : false ; // Set login status
       state.data = action.payload.message.user_details;
       state.info = action.payload.message.due;
-      state.full_name = action.payload.message.full_name
+      state.full_name = action.payload.message.customer_name
       const { api_key, api_secret } = action.payload.key_details || {};
       const token = `${api_key}:${api_secret}`; // Set token
       state.token = token;

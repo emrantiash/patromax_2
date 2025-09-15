@@ -1,4 +1,4 @@
-import { ScrollView, View, StyleSheet } from "react-native";
+import { ScrollView, View, StyleSheet,Platform } from "react-native";
 import React from "react";
 import { Text, Card } from "@gluestack-ui/themed";
 
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     height: 8,
     width: 8,
     backgroundColor: "#bbb",
-    borderRadius: "50%",
+    borderRadius: Platform.OS === "ios" ?  "50%" : 0,
     display: "inline-block",
   },
   summery : {

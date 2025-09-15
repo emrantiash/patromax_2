@@ -1,4 +1,4 @@
-import { View, StyleSheet, Dimensions,Linking } from 'react-native'
+import { View, StyleSheet, Dimensions,Linking,Platform } from 'react-native'
 import React from 'react'
 import ImageItem from '../../component/image/ImageItem'
 import { Text, Card } from "@gluestack-ui/themed";
@@ -23,7 +23,7 @@ export default function support() {
         await Linking.openURL(url);
       }
     } catch (error) {
-      console.error('An error occurred:', error);
+      // console.error('An error occurred:', error);
       Alert.alert('Failed to open dialer.');
     }
 

@@ -151,7 +151,9 @@ export default function index() {
   };
 
   const withoutPayment = () => {
-    // console.log(data)
+   if( thisWarehouse == "")
+   alert("Select WareHouse")
+  else{
     _storeJob();
     let newDate = new Date();
     let date = newDate.getDate();
@@ -192,6 +194,8 @@ export default function index() {
 
     dispatch(storeOrder(_data));
     router.push("screen/orderDetails/OrderDetails");
+  }
+    
   };
 
   const itemSelected = (item) => {
@@ -380,7 +384,7 @@ export default function index() {
               variant={"outline"}
               action="secondary"
               text={i18n.t("Proceed_without_payment")}
-              width={(width * 40) / 100}
+              width={(width * 45) / 100}
               borderRadius={10}
               onClick={withoutPayment}
               fontColor={"#2f2f2f"}

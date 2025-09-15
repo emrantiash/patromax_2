@@ -41,7 +41,6 @@ const __selectdata = [
 
 export default function Page() {
   const config = useConfig();
-  // console.log(config[2]);
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [status,setStatus] = useState("")
@@ -58,7 +57,6 @@ export default function Page() {
   const getDataCall = (option) => {
     setIsLoading(true)
     dispatch(getHistory(option)).then(function (e) {
-      console.log("====history ==="+JSON.stringify(e.payload.message));
       setData(e?.payload.message);
       setIsLoading(false)
     });

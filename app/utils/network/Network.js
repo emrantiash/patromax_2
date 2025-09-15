@@ -1,4 +1,5 @@
-const network = "https://petromax.dev.myomnierp.com/api/" //process.env.EXPO_PUBLIC_API_URL
+const apiUrl =  process.env.EXPO_PUBLIC_API_URL
+const network = apiUrl
 
 
 const Network = {

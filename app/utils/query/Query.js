@@ -68,19 +68,19 @@ export function customgetv2(end, data) {
 export function noHeaderpost(end, data) {
   // const con = useConfig()
   // const headers = getHeaderFunction();
-  console.log(Network.network + end, data);
+  // console.log(Network.network + end, data);
   return axios.post(Network.network + end, data);
 }
 
 export function post(end, data) {
   const headers = getHeaderFunction();
-  // console.log(Network.network + end, data, { headers })
+  //  console.log(Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 
 export function customPost(end, data) {
   const headers = getHeaderFunctionFormData();
-  console.log("==image path==="+Network.network + end, data, { headers })
+  // console.log("==image path==="+Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 

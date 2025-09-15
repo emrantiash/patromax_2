@@ -131,6 +131,7 @@ export default function UploadScreen() {
   const makeTheCall = () => {
     const __payment = Number(totalPaid) + Number(paid_amount);
     if (Number(paid_amount) == 0) alert("O amount is not allowed");
+    else if (isNaN(__payment)) alert("Amount is not number");
     else if (__payment > total) alert("Amount is too large");
     else if(myaccount== "") alert("Enter a/c");
     else {

@@ -67,7 +67,6 @@ export const historySlice = createSlice({
     });
 
     builder.addCase(getDashboard.fulfilled, (state, action) => {
-      console.log("==weekly===",action.payload?.message?.weekly_data)
      state.data =  action.payload?.message?.weekly_data
      state.info = action.payload.message?.stats
     });

@@ -59,18 +59,17 @@ export default function OrderDetails() {
     router.push("screen/uploadScreen/UploadScreen");
   };
 
-  console.log("Order Details ==="+JSON.stringify(data))
 
   const call_sales_order = () => {
     setIsLoading(true);
     const thisdata = {
       custom_delivery_point_2: data.warehouse,
       docstatus: 0,
-      name: "new-sales-order-item-jhugcvdhfs",
+      // name: "new-sales-order-item-jhugcvdhfs",
       doctype: "Sales Order",
-      __islocal: 1,
-      __unsaved: 1,
-      owner: "Administrator",
+      // __islocal: 1,
+      // __unsaved: 1,
+      // owner: "Administrator",
       title: config[2],
       naming_series: "SAL-ORD-.YYYY.-",
       order_type: "Sales",
@@ -87,9 +86,9 @@ export default function OrderDetails() {
         ..._data,
         docstatus: 0,
         doctype: "Sales Order Item",
-        __islocal: 1,
-        __unsaved: 1,
-        owner: "Administrator",
+        // __islocal: 1,
+        // __unsaved: 1,
+        // owner: "Administrator",
         ensure_delivery_based_on_produced_serial_no: 0,
         is_stock_item: 0,
         reserve_stock: 1,
@@ -158,7 +157,7 @@ export default function OrderDetails() {
         price_or_product_discount: "Price",
         pricing_rule_for: "Discount Percentage",
         has_pricing_rule: 1,
-        delivery_date: "2026-07-09",
+        delivery_date: data.date_use,//"2026-07-09",
       })),
 
       taxes: [],
@@ -167,7 +166,7 @@ export default function OrderDetails() {
       packed_items: [],
       pricing_rules: [],
       payment_schedule: [],
-      status: "Draft",
+      // status: "Draft",
       delivery_status: "Not Delivered",
       billing_status: "Not Billed",
       sales_team: [],
@@ -208,10 +207,8 @@ export default function OrderDetails() {
     };
     const option = { doc: JSON.stringify(thisdata), action: "Save" };
 
-    // console.log("===the option is ==",option)
 
     dispatch(postOrder(option)).then(function (e) {
-      // console.log("===the sales order  ==",e.payload)
       e?.payload?.docs[0]?.name
         ? _confirm(e.payload.docs[0].name)
         : // ("===sales order created===")
@@ -232,8 +229,9 @@ export default function OrderDetails() {
           makeTheCall()
         : e.payload.data.name
         ? payment(e.payload.data.name)
-        : // console.log("==sales order confirmed==")
-          alert("Something went wrong with order submit ");
+        : (
+           console.log("==sales order confirmed=="),
+          alert("Something went wrong with order submit "))
     });
   };
 
@@ -241,11 +239,12 @@ export default function OrderDetails() {
   const payment = (reference_name) => {
     data.order && setIsLoading(true);
     // console.log("====payment called====", data);
+    // console.log("bank"+data.bank.split(":")[0])
     const thisdata = {
       // bank
       bank: data.bank.split(":")[0],
       bank_account: data.bank.split(":")[1],
-      paid_to: "Bank Account - PM",
+      paid_to: data.bank.split(":")[0] +" - PM",
       paid_to_account_type: "Bank",
       mode_of_payment: "Wire Transfer",
       custom_from_account: data.myaccount,
@@ -330,7 +329,7 @@ export default function OrderDetails() {
     const option = { doc: JSON.stringify(thisdata), action: "Save" };
 
     dispatch(postOrder(option)).then(function (e) {
-      // console.log(e.payload);
+       console.log("post payment"+e.payload);
       if (e.payload.docs[0].name) {
         const name = e.payload.docs[0].name;
         // console.log(image);
@@ -362,7 +361,7 @@ export default function OrderDetails() {
         const option = [tail, data];
 
         dispatch(submitPayment(option)).then(function (e) {
-          // ("===submit paymenty ===", e.payload.data.name);
+           ("===submit paymenty ===", e.payload.data.name);
           if (e.payload.data.name) {
             makeTheCall();
             // salesInvoice(e.payload.data.name, reference_name);

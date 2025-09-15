@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   StatusBar,
   Platform,
+  BackHandler,
+  Alert
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch,useSelector } from "react-redux";
@@ -18,6 +20,7 @@ import { getMyCart } from "../../../redux/slices/cartSlice";
 import { getDashboard ,getActiveOrder} from "../../../redux/slices/historySlice";
 import { router } from "expo-router";
 import useConfig from "../../../lib/hook/config";
+import { useFocusEffect } from "@react-navigation/native";
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
@@ -55,13 +58,36 @@ export default function index() {
 
   const [data,setData] = useState(barData) //useState(useSelector((state)=>state.historyReducer.data))
   const [info,setInfo] = useState([])
-  // console.log(info)
+
+  const handleBackPress = ()=>{
+    Alert.alert('Exit App','Are you sure to exit?',[
+      {
+        text : 'Cancel',
+        onPress : () => null ,
+        style : 'cancel'
+      },
+      {
+        text : 'Exit',
+        onPress : ()=>BackHandler.exitApp()
+      }
+    ]);
+    return true ;
+  }
+
+  useFocusEffect(
+    React.useCallback(()=>{
+      BackHandler.addEventListener('hardwareBackPress',handleBackPress)
+      return ()=>{
+        BackHandler.removeEventListener('hardwareBackPress',handleBackPress)
+      }
+    })
+  )
   
   useEffect(() => {
-
     let option = {
       customer : config[2]
     }
+
     dispatch(getDashboard(option)).then(function(e){
       let _array = e.payload?.message?.weekly_data
       // setData(e.payload.message.weekly_data)
@@ -75,10 +101,9 @@ export default function index() {
       // setData(e.payload.message.weekly_data)
       setInfo(e.payload.message.stats)
     })
-
-    
-   
     dispatch(getMyCart(option));
+
+   
     
   }, []);
 
@@ -92,10 +117,6 @@ export default function index() {
     router.push("screen/activeScreen/ActiveScreen");
   };
 
-  // console.log("===data===",data)
-  console.log("===data===",info)
-
-
 
   return (
     <ScrollView contentContainerStyle={styles.conatiner}>
@@ -108,7 +129,7 @@ export default function index() {
       <Card style={styles.headerTop}>
         <View style={styles.upperCard}>
           <Text size="lg" bold>
-            Welcome, {config[1]?.first_name} !
+            Welcome, {config[1]?.first_name + ' '  + config[1]?.last_name} !
           </Text>
           <Text size="sm">Here's what you need to know today</Text>
         </View>

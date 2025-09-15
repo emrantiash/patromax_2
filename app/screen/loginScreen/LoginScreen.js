@@ -1,7 +1,7 @@
 import { View, StyleSheet, Dimensions, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signIn, setLanguage, getOtp, testPost, setLanguageName ,signout} from "../../redux/slices/loginSlice";
+import { signIn, setLanguage, getOtp, testPost, setLanguageName ,signout, getLogin} from "../../redux/slices/loginSlice";
 import InputBox from "../../component/input/Input";
 import ButtonBox from "../../component/button/Button";
 import ImageItem from "../../component/image/ImageItem";
@@ -94,20 +94,36 @@ export default function LoginScreen() {
         usr: object.email,
         pwd: object.password,
       };
-   
-      dispatch(getOtp(option)).then(function(e){
+
+
+      // <--- without OTP ---->
+      dispatch(getLogin(option)).then(function (e) {
         setIsLoading(false);
-        console.log(e.payload)
-       if(e.payload && e.payload?.message.message == "OTP sent") {
-        router.push("screen/varify/Varify")
-       }
+        if (e.payload?.message && e.payload?.message.message == "Logged In") {
+          let option = {
+            customer: e.payload.full_name,
+          };
+          dispatch(getDashboard(option));
+          router.push("/(tabs)/home");
+          // router.push("screen/varify/Varify")
+        } else handleToast("Wrong INput");
+      });
+
+
+      // <--- OTP --->
+      // dispatch(getOtp(option)).then(function(e){
+      //   setIsLoading(false);
+      //   console.log(e.payload)
+      //  if(e.payload && e.payload?.message.message == "OTP sent") {
+      //   router.push("screen/varify/Varify")
+      //  }
        
-       else
-       {
-        handleToast("Wrong UserName or Password")
-       }
+      //  else
+      //  {
+      //   handleToast("Wrong UserName or Password")
+      //  }
       
-      })
+      // })
     }
     
    

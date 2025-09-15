@@ -27,7 +27,6 @@ export default function settings() {
   const [mylanguage,setMylanguage] = useState(0)
 
   const selectedValue =(value) =>{
-    // console.log("=== ===  ===",value)
     // dispatch(setLanguage(parseInt(value)))
     // dispatch(setLanguageName(name))
   }
@@ -116,7 +115,9 @@ export default function settings() {
           <Text size="md"> Private policy</Text>
           
         </TouchableOpacity>
-        <TouchableOpacity style={styles.innerBody} onPress={()=>_policy('screen/services/Services')}>
+        <TouchableOpacity style={styles.innerBody}
+         onPress={()=>_policy('screen/services/Services')}
+         >
           <Text size="md"> Terms of service </Text>
           
         </TouchableOpacity>

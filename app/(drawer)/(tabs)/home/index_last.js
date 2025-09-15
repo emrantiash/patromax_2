@@ -52,7 +52,6 @@ export default function index() {
 
   i18n.locale = getLocales()[_language].languageCode;
 
-  // console.log(i18n.t('Total'));
 
   useEffect(() => {
     <Redirect href="screen/cart/Cart" />;
@@ -82,7 +81,7 @@ export default function index() {
     const newState = [...data];
 
     newState.splice(data.indexOf(item), 1, updatedItem);
-    // console.log("==" + JSON.stringify(newState));
+
     setData(newState);
   };
 

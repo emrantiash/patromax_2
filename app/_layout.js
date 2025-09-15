@@ -18,35 +18,12 @@ export default function _layout(){
   const appState = useRef(AppState.currentState);
   const handleLogout = () => {
     // Implement your logout logic here
-    console.log('User logged out due to inactivity');
     // Clear user data, navigate to login screen, etc.
     router.push('/screen/loginScreen/LoginScreen');
   };
 
   const panHandlers = useAutoLogout(handleLogout);
  
-
-//    useEffect(() => {
-//     const subscription = AppState.addEventListener('change', nextAppState => {
-//       if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-//         console.log('App has come to the foreground!');
-//         resetTimeout()
-//       } else if (appState.current === 'active' && nextAppState.match(/inactive|background/)) {
-//         console.log('App has gone to the background or become inactive!');
-       
-//       }
-//       appState.current = nextAppState;
-//     });
-// console.log("appState.current==="+appState.current)
-//     return () => {
-//       console.log("return ==="+appState.current)
-//       subscription.remove();
-//     };
-//   }, []);
-
-
-  
-
   return (
     <Provider store={store} {...panHandlers}>
       <PersistGate persistor={persistor}>
