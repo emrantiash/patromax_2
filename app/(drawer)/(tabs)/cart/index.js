@@ -34,10 +34,11 @@ const height = Dimensions.get("window").height;
 import _data from "../home/data";
 import { getLocales } from "expo-localization";
 import { i18n } from "../../../utils/libs/localization/Localization";
+import useConfig from "../../../lib/hook/config";
 
 export default function index() {
+  const config = useConfig()
   const dispatch = useDispatch();
-  const _language = useSelector((state) => state.loginReducer.language) || 0 ;
   const _mydata = useSelector((state) => state.cartReducer.data);
   const compare = useSelector((state) => state.cartReducer.compare);
   const [warehouse,setWarehouse] = useState([]) //useSelector((state) => state.productReducer.warehouse);
@@ -47,9 +48,9 @@ export default function index() {
   const [thisWarehouse,setThisWarehouse] = useState("")
   const [refreshing, setRefreshing] = useState(false);
 
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn'
 
-  console.log("=========++================="+JSON.stringify(_mydata))
+  // console.log("=========++================="+JSON.stringify(_mydata))
 
   const onRefresh = async () => {
     setRefreshing(true);

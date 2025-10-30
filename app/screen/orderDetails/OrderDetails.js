@@ -47,8 +47,7 @@ const width = Dimensions.get("window").width;
 export default function OrderDetails() {
   const config = useConfig();
   const dispatch = useDispatch();
-  const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   const data = useSelector((state) => state.orderReducer.data);
   const image = useSelector((state) => state.cartReducer.image);
   const [totalPayment,setTotalPayment] = useState(0);
@@ -121,7 +120,7 @@ export default function OrderDetails() {
     };
     data?.order && 
     dispatch(getPaymentEntries(option)).then(function(e){
-       console.log("=======ent======"+(e?.payload.message.length))
+      //  console.log("=======ent======"+(e?.payload.message.length))
       if(e?.payload.message.length !== 0)
       setEntries( e?.payload?.message?.values  )
       // setEntries( e?.payload.message ? e?.payload?.message?.values : [] )

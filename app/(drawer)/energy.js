@@ -18,7 +18,7 @@ export default function energy() {
   const config = useConfig();
   const router = useRouter();
   const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   return (
     <View style={styles.container}>
       {/* <Card style={styles.upperCard}> */}

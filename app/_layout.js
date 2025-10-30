@@ -42,7 +42,7 @@ export default function _layout(){
     prepare();
   }, []);
 
-  console.log("===="+fontsLoaded)
+  // console.log("===="+fontsLoaded)
 
   // if (!fontsLoaded) {
   //   return null;

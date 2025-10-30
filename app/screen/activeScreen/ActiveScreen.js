@@ -18,8 +18,7 @@ export default function Page() {
   const config = useConfig()
  const items = useSelector((state)=>state.historyReducer.order_active);
  const [isLoading, setIsLoading] = useState(true);
-  const _language = useSelector((state)=>state.loginReducer.language) ;
-  i18n.locale = getLocales()[_language].languageCode
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
 
   const calculate_payment = (data) =>{
     let __amount = 0 

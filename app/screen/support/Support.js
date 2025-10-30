@@ -9,10 +9,11 @@ import ButtonBox from '../../component/button/Button';
 import * as Clipboard from "expo-clipboard";
 import { i18n } from "../../utils/libs/localization/Localization";
 import { getLocales } from "expo-localization";
+import useConfig from '../../lib/hook/config';
 
 export default function support() {
-  const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  const config = useConfig()
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
 
   const copyToClipboard = async (data) => {
     await Clipboard.setStringAsync(data);

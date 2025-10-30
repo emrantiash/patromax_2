@@ -6,10 +6,11 @@ import { Stack, router } from "expo-router";
 import { useSelector } from 'react-redux';
 import { i18n } from '../utils/libs/localization/Localization';
 import { getLocales } from "expo-localization";
+import useConfig from "../lib/hook/config";
 
 export default function Routes() {
-  const _language = useSelector((state) => state.loginReducer.language)  ;
-  i18n.locale =  getLocales()[_language]?.languageCode || 'en';
+  const config = useConfig()
+  i18n.locale =  config[5] === 0 ? 'en' : 'bn'
 
   const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
   const appState = useRef(AppState.currentState);

@@ -44,9 +44,11 @@ const payment_method = [
 ];
 
 const today = new Date();
+import useConfig from "../../lib/hook/config";
 
 export default function UploadScreen() {
   const dispatch = useDispatch();
+  const config = useConfig();
   const toast = useToast();
   const [payment_method,setPayment_method] = useState([])
   const [toastId, setToastId] = useState(0);
@@ -55,8 +57,7 @@ export default function UploadScreen() {
   const [depositValue, setDepositValue] = useState("");
   const [bank, setBank] = useState("");
   const [selectedMethod, setSelectedMethod] = useState("");
-  const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   const [selectedImage, setSelectedImage] = useState([]);
   const [myaccount, setMyaccount] = useState("");
   const [paid_amount, setPaid_amount] = useState(total);
@@ -115,7 +116,7 @@ export default function UploadScreen() {
     // dispatch(getBankName(option))
 
     dispatch(getBankName(option)).then(function(e){
-      console.log("===bank======== ", (e.payload.message))
+      // console.log("===bank======== ", (e.payload.message))
       setBank_account(makeBankName(e.payload.message))
     })
 
@@ -185,7 +186,7 @@ export default function UploadScreen() {
 
   // console.log(paid_amount)
 
-  i18n.locale = getLocales()[_language].languageCode;
+  // i18n.locale = config[5] === 0 ? 'en' : 'bn';
 
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({

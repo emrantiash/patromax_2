@@ -34,8 +34,7 @@ import { i18n } from "../../../utils/libs/localization/Localization";
 const width = Dimensions.get("window").width;
 
 export function NotificationCard({ order, time, status }) {
-  const _language = useSelector((state) => state.loginReducer.language) || 0 ;
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn' ;
   return (
     <Card size="md" variant="outline" className="" style={styles.cardRoot}>
       <View style={styles.cover}>

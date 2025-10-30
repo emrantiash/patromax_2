@@ -5,12 +5,14 @@ export default function useConfig() {
   const data = useSelector((state) => state.loginReducer.data);
   const name = useSelector((state) => state.loginReducer.full_name ) ;
   const use_name = useSelector((state)=>state.loginReducer.use_name) ;
-  const info = useSelector((state) => state.loginReducer.info ) 
+  const info = useSelector((state) => state.loginReducer.info ) ;
+
+  const _language = useSelector((state) => state.loginReducer.language) 
 
 
   
 
   // const errorMsg = useSelector((state) => state.loginReducer.errorMsg);
 
-  return [isLogin,data,name,info,use_name];
+  return [isLogin,data,name,info,use_name,_language];
 }

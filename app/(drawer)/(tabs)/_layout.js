@@ -22,8 +22,7 @@ export default function _layout() {
   const dispatch = useDispatch();
   const config = useConfig();
   const [noti,setnoti] = useState(0)
-  const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   // const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
   useEffect(() => {
     const option = {

@@ -24,8 +24,10 @@ const CustomDrawerContent = (props) => {
   const config = useConfig();
   const pathname = usePathname();
   const dispatch = useDispatch()
-  const _language =  useSelector((state)=>state.loginReducer.language)  || 0 ;
-  i18n.locale = getLocales()[_language]?.languageCode
+
+  i18n.locale = config[5] === 0 ? 'en' : 'bn'
+
+  console.log("====="+i18n.locale)
 
   useEffect(() => {
   }, [pathname]);

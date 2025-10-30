@@ -4,10 +4,11 @@ import React from "react";
 import { Text, Card } from "@gluestack-ui/themed";
 import { i18n } from "../../utils/libs/localization/Localization";
 import { getLocales } from "expo-localization";
+import useConfig from "../../lib/hook/config";
 
 export default function Services() {
-  const _language = useSelector((state) => state.loginReducer.language);
-  i18n.locale = getLocales()[_language]?.languageCode;
+  const config = useConfig()
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   return (
     <View style={styles.container}>
       <View style={styles.title}>

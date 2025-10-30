@@ -21,16 +21,16 @@ import { i18n } from "../../utils/libs/localization/Localization";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 import * as Font from "expo-font";
-// import *  from '../../../assets/fonts/HindSiliguri'
+import useConfig from "../../lib/hook/config";
 
 
 export default function LoginScreen() {
   const dispatch = useDispatch();
-  const _language = useSelector((state) => state.loginReducer.language) || 0;
-  i18n.locale = getLocales()[_language]?.languageCode;
-  console.log(i18n.locale)
+  const config = useConfig()
+  i18n.locale = config[5] === 0 ? 'en' : 'bn';
   const [isLoading, setIsLoading] = useState(false);
-  const msg = useSelector((state)=>state.loginReducer.isError)
+  const msg = useSelector((state)=>state.loginReducer.data)
+  console.log("=error===="+msg)
   const [object, setObject] = useState({
     email: "mdk058@demo.com",
     password: "demo12345@",
@@ -109,7 +109,6 @@ export default function LoginScreen() {
 
       // <--- without OTP ---->
       dispatch(getLogin(option)).then(function (e) {
-        console.log(e.payload)
         setIsLoading(false);
         if (e.payload?.message && e.payload?.message.message == "Logged In") {
           let option = {
@@ -118,7 +117,10 @@ export default function LoginScreen() {
           dispatch(getDashboard(option));
           router.push("/(tabs)/home");
           // router.push("screen/varify/Varify")
-        } else handleToast("Wrong INput");
+        } else{
+          setIsLoading(false);
+          handleToast("Wrong INput");
+        } 
       });
 
 

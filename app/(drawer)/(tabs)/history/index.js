@@ -45,8 +45,7 @@ export default function Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [status,setStatus] = useState("")
-  const _language = useSelector((state) => state.loginReducer.language) || 0 ;
-  i18n.locale = getLocales()[_language].languageCode;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn' ;
   const [data, setData] = useState([]);
 
   useEffect(() => {

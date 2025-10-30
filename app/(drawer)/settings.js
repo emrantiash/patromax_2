@@ -24,7 +24,8 @@ const data = [
 export default function settings() {
   const dispatch = useDispatch()
 
-  const _language =  useSelector((state)=>state.loginReducer.language)
+  const _language = useSelector((state) => state.loginReducer.language)  ;
+  i18n.locale = _language === 0 ? 'en' : 'bn' 
 
   // console.log(_language)
 
@@ -33,7 +34,7 @@ export default function settings() {
   const selectedValue =(value) =>{
     dispatch(setLanguage(parseInt(value)))
     // dispatch(setLanguageName(name))
-    // setMylanguage(parseInt(value))
+    setMylanguage(parseInt(value))
   }
 
   // console.log(mylanguage)

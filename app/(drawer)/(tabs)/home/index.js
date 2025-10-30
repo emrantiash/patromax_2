@@ -52,9 +52,10 @@ const barData = [
 export default function index() {
   const dispatch = useDispatch();
   const config = useConfig();
-  const _language = useSelector((state) => state.loginReducer.language)  ;
-  i18n.locale = getLocales()[_language]?.languageCode;
-   console.log(_language,i18n.locale)
+  // const _language = useSelector((state) => state.loginReducer.language)  ;
+  i18n.locale = config[5] === 0 ? 'en' : 'bn' //getLocales()[1]?.languageCode ;
+
+  //  console.log(_language,i18n.locale)
   let newDate = new Date();
     let date = newDate.getDate();
     let month = newDate.toLocaleString('default', { month: 'long' });;

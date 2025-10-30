@@ -6,6 +6,7 @@ import { post,noHeaderpost } from "../../utils/query/Query";
 export const getOtp = createAsyncThunk('get-otp', async (data) => {
   try {
     const response = await noHeaderpost(Endpoint.login, data)
+    console.log(response)
     return response.data
   }
   catch (error) {
@@ -22,7 +23,7 @@ export const getLogin = createAsyncThunk('get-login', async (data) => {
     return response.data
   }
   catch (error) {
-    return error.response.data
+    return rejectWithValue(error.response.data);
   }
 
 })
@@ -106,8 +107,9 @@ export const loginSlice = createSlice({
 
     builder.addCase(getLogin.fulfilled, (state, action) => {
       state.isLoading = false; // Loading finished
+      state.error = action.payload.message;
       state.login = action.payload.message.message == "Logged In" ? true : false ; // Set login status
-      state.data = action.payload.message.user_details;
+      state.data = action.payload.message.user_details || [];
       state.info = action.payload.message.due;
       state.full_name = action.payload.message.customer_name;
       state.use_name = action.payload.message.full_name;
