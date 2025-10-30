@@ -1,13 +1,18 @@
-import { View, StyleSheet, Dimensions,Linking,Platform } from 'react-native'
-import React from 'react'
+import { View, StyleSheet, Dimensions,Linking,Platform } from 'react-native';
+import React from 'react';
+import { useSelector } from "react-redux";;
 import ImageItem from '../../component/image/ImageItem'
 import { Text, Card } from "@gluestack-ui/themed";
 const height = Dimensions.get('window').height;
 const width = Dimensions.get('window').width;
 import ButtonBox from '../../component/button/Button';
 import * as Clipboard from "expo-clipboard";
+import { i18n } from "../../utils/libs/localization/Localization";
+import { getLocales } from "expo-localization";
 
 export default function support() {
+  const _language = useSelector((state) => state.loginReducer.language);
+  i18n.locale = getLocales()[_language]?.languageCode;
 
   const copyToClipboard = async (data) => {
     await Clipboard.setStringAsync(data);
@@ -38,7 +43,7 @@ export default function support() {
           size="md"
         />
         <View >
-          <Text>Petromax Support</Text>
+          <Text> {i18n.t("support_head")}</Text>
         </View>
         <View >
           <Text size="3xl" bold>+8809678111000</Text>
@@ -46,7 +51,7 @@ export default function support() {
       </View>
 
       <View style={styles.body}>
-        <Text>Your call will be rcorder for future training purpose</Text>
+        <Text>{i18n.t("support_discuss")}</Text>
       </View>
 
       <View style={styles.body}>
@@ -58,7 +63,7 @@ export default function support() {
 
 <ButtonBox
           variant="solid" action="negative"
-          text="Call"
+          text={i18n.t("Call")}
           width={(width*90)/100}
           fontColor={'#fff'}
           borderRadius={10}
@@ -66,7 +71,7 @@ export default function support() {
         />
          <ButtonBox
          variant="outline" action="secondary"
-          text="Copy to clipboard"
+          text={i18n.t("Clipboard")}
           width={(width*90)/100}
           // fontColor={'#fff'}
           

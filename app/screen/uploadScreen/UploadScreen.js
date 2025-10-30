@@ -6,9 +6,12 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Button,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   Card,
   Text,
@@ -27,6 +30,7 @@ import { getLocales } from "expo-localization";
 import { router } from "expo-router";
 import { storeOrder, getBankName } from "../../redux/slices/orderSlice";
 import { storeImage } from "../../redux/slices/cartSlice";
+import { getPaymentMethod } from "../../redux/slices/orderSlice";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
@@ -39,15 +43,20 @@ const payment_method = [
   },
 ];
 
+const today = new Date();
+
 export default function UploadScreen() {
   const dispatch = useDispatch();
   const toast = useToast();
+  const [payment_method,setPayment_method] = useState([])
   const [toastId, setToastId] = useState(0);
   const total = useSelector((state) => state.cartReducer.total);
   const data = useSelector((state) => state.cartReducer);
   const [depositValue, setDepositValue] = useState("");
   const [bank, setBank] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState("");
   const _language = useSelector((state) => state.loginReducer.language);
+  i18n.locale = getLocales()[_language]?.languageCode;
   const [selectedImage, setSelectedImage] = useState([]);
   const [myaccount, setMyaccount] = useState("");
   const [paid_amount, setPaid_amount] = useState(total);
@@ -57,26 +66,101 @@ export default function UploadScreen() {
   const [createObjectURL, setCreateObjectURL] = useState("");
   const [totalPaid, setTotalPaid] = useState(0);
 
-  const bank_account = useSelector((state) => state.orderReducer.banks);
+  const [arrayData, setArrayData] = useState([]);
+
+  const [bank_account,setBank_account] = useState([]) //useSelector((state) => state.orderReducer.banks);
+  // const bank_account = useSelector((state) => state.orderReducer.banks);
   const warehouse = useSelector(
     (state) => state.productReducer.selectedWareHouse
   );
 
-  useEffect(() => {
+  const ___date = new Date();
+  let _date = ___date.getDate();
+  let month = ___date.getMonth() + 1;
+  let year = ___date.getFullYear();
+  const __date = year + "-" + month + "-" + _date;
+
+  const [date, setDate] = useState(new Date()); // Initialize with current date
+  const [show, setShow] = useState(false); // State to control picker visibility
+  const [myDate, setMyDate] = useState(__date);
+
+  const onChange = (event, selectedDate) => {
+    let date = selectedDate.getDate();
+    let month = selectedDate.getMonth() + 1;
+    let year = selectedDate.getFullYear();
+    let ___mydate = year + "-" + month + "-" + date;
+    setMyDate(___mydate);
+
+    // const dateObject = selectedDate;
+    // const options = { month: "short", day: "numeric", year: "numeric" };
+    // const formattedDate = dateObject.toLocaleDateString("en-US", options);
+
+    const currentDate = selectedDate || date; // Keep current date if no new date is selected
+
+    setShow(false); // Hide picker on iOS after selection
+    setDate(selectedDate);
+  };
+
+  const showDatePicker = () => {
+    setShow(true);
+  };
+
+  useEffect(()=>{
     const option = {
+      doctype: "Account",
+      company: "Petromax",
+      parent: "Bank Accounts - PM",
+    };
+    console.log("===bank======== ")
+    // dispatch(getBankName(option))
+
+    dispatch(getBankName(option)).then(function(e){
+      console.log("===bank======== ", (e.payload.message))
+      setBank_account(makeBankName(e.payload.message))
+    })
+
+  },[])
+
+  const makeBankName = (data) =>{
+    let arr = [];
+  data.map((data, index) =>
+  index != 0  && 
+    arr.push({
+      name : data.value.split(" - ")[0],
+      value : data.value.split(" - ")[0] 
+    }),
+  );
+  return arr;
+  }
+
+  useEffect(() => {
+    
+
+    const _option = {
       txt: "",
-      doctype: "Bank Account",
+      doctype: "Mode of Payment",
       ignore_user_permissions: 0,
       reference_doctype: "Payment Entry",
-      page_length: 10,
-      filters: {
-        is_company_account: 1,
-        company: "Petromax",
-      },
+      page_length: "10",
     };
-
-    dispatch(getBankName(option));
+    dispatch(getPaymentMethod(_option)).then(function (e) {
+      
+      setPayment_method(makePaymentMethod(e.payload.message))
+    });
   }, []);
+
+  // console.log(payment_method)
+
+  const makePaymentMethod = (data) =>{
+    let arr = [];
+  data.map((data, index) =>
+    arr.push({
+      name : data.value,
+      value : data.value 
+    }),
+  );
+  return arr;
+  }
 
   useEffect(() => {
     let paid = 0;
@@ -125,15 +209,17 @@ export default function UploadScreen() {
     setMyaccount(text);
   };
   const setInputValue = (name, text) => {
-    setPaid_amount(text);
+    const numberWithoutLeadingZeros = parseInt(text, 10);
+    setPaid_amount(numberWithoutLeadingZeros || 0);
   };
 
   const makeTheCall = () => {
     const __payment = Number(totalPaid) + Number(paid_amount);
     if (Number(paid_amount) == 0) alert("O amount is not allowed");
+    else if (Number(paid_amount) < 0) alert("negative  amount is not allowed");
     else if (isNaN(__payment)) alert("Amount is not number");
-    else if (__payment > total) alert("Amount is too large");
-    else if(myaccount== "") alert("Enter a/c");
+    // else if (__payment > total) alert("Amount is too large");
+    else if (myaccount == "") alert("Enter a/c");
     else {
       if (depositValue !== "" && bank !== "") {
         let newDate = new Date();
@@ -168,6 +254,8 @@ export default function UploadScreen() {
               ? "Paid"
               : "Prtly Paid",
           subtotal: subtotal,
+          posting_date: myDate,
+          mode_of_payment : selectedMethod,
           tax: tax,
           paid_amount: paid_amount,
           total: subtotal + tax,
@@ -182,12 +270,16 @@ export default function UploadScreen() {
 
         dispatch(storeOrder(_data));
         dispatch(storeImage(selectedImage[0]));
-        router.push("screen/orderDetails/OrderDetails");
+
+        setArrayData((prevArray) => [...prevArray, _data]);
+
+        router.push("screen/orderDetails/OrderDetails"); // uncommnet this
       } else {
         alert("All fields must be filled");
       }
     }
   };
+  // console.log("====array==="+JSON.stringify(arrayData))
 
   const showNewToast = (data) => {
     const newId = Math.random();
@@ -220,6 +312,10 @@ export default function UploadScreen() {
     setDepositValue(e);
   };
 
+  const selectedPayMethodValue = (a)=>{
+    setSelectedMethod(a)
+  }
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -241,6 +337,7 @@ export default function UploadScreen() {
                   />
                 ))}
             </Card>
+
             <ButtonBox
               width={(width * 90) / 100}
               action="secondary"
@@ -256,11 +353,84 @@ export default function UploadScreen() {
             />
           </View>
           <View style={styles.bankInfo}></View>
+          {arrayData.length > 0 &&
+            arrayData.map((data, index) => (
+              <View key={index}>
+                <Text size="2xl">AMOUT IS ={data.paid_amount}</Text>
+              </View>
+            ))}
+          <View style={styles.body}>
+            <View
+              style={{
+                // backgroundColor : 'yellow',
+                flexDirectionc: "row",
+                height: "100%",
+                justifyContent: "space-around",
+              }}
+            >
+              <Text className="text-bold-200" color="black" size="sm">
+                {i18n.t("Payment_date")}
+              </Text>
+
+              <View>
+                {show ? (
+                  <View
+                    style={{
+                      // backgroundColor : 'green',
+                      width: "50%",
+                      justifyContent: "flex-start",
+                      alignItems: "flex-start",
+                      margin: 0,
+                      padding: 0,
+                    }}
+                  >
+                    <DateTimePicker
+                      testID="dateTimePicker"
+                      value={date}
+                      mode="date" // Set mode to 'date' for date picker
+                      // is24Hour={true}
+                      // display="calendar"
+                      onChange={onChange}
+                      maximumDate={today}
+                    />
+                  </View>
+                ) : (
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    {/* <Text onPress={showDatePicker}>{myDate}</Text> */}
+                    <InputBox
+                    isDisabled = {true}
+                      isLabel={false}
+                      width={(width * 40) / 100}
+                      borderRadius={8}
+                      value={myDate}
+                      setInputValue={myaccounset}
+                      height={45}
+                    />
+                    <FontAwesome
+                      name="calendar"
+                      onPress={showDatePicker}
+                      size={18}
+                      color="black"
+                    />
+                    {/* <Button onPress={showDatePicker} title="Show!" /> */}
+                  </View>
+
+                  // <Text onPress={showDatePicker}>{date.toLocaleString()}</Text>
+                )}
+              </View>
+            </View>
+          </View>
           <View style={styles.body}>
             <InputBox
               isLabel={true}
               labelSize={"sm"}
-              label={"Payment Account"}
+              label={i18n.t("Payment_account")}
               borderRadius={8}
               placeholder={"a/c"}
               setInputValue={myaccounset}
@@ -271,7 +441,7 @@ export default function UploadScreen() {
             <InputBox
               isLabel={true}
               labelSize={"sm"}
-              label={"Payment Amount"}
+              label={i18n.t("Payment_amount")}
               borderRadius={8}
               value={paid_amount.toString()}
               setInputValue={setInputValue}
@@ -279,21 +449,22 @@ export default function UploadScreen() {
             />
           </View>
           <View style={styles.body}>
-            <Text size="sm">Payment Method</Text>
+            <Text size="sm">{i18n.t("Payment_method")}</Text>
             <SelectBox
-              defaultValue="Bank Deposit"
+              defaultValue={selectedMethod ? selectedMethod : i18n.t("Select_Option")}
               height={40}
               data={payment_method}
-              selectedValue={selectedValue}
+              selectedValue={selectedPayMethodValue}
+              
             />
           </View>
           <View style={styles.body}>
             <InputBox
               name="deposit"
-              placeholder={"Deposit reference"}
+              placeholder={i18n.t("Deposit_reference")}
               isLabel={true}
               labelSize={"sm"}
-              label={"Deposit Reference"}
+              label={i18n.t("Deposit_reference")}
               borderRadius={8}
               height={50}
               setInputValue={setDepositVal}

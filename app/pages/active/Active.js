@@ -70,7 +70,7 @@ export default function Active({status,order,total,items,date,dataset,action,amo
            { data.capacity}
           </Text>
           <Text size="sm" sub >
-            (Qty) {data.qty || data.quantity} 
+            ({data.productType}) {data.qty || data.quantity} 
           </Text>
         </View>
           )

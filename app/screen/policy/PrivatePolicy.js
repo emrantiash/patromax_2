@@ -1,54 +1,60 @@
 import { ScrollView, View, StyleSheet,Platform } from "react-native";
+import { useSelector } from "react-redux";
 import React from "react";
 import { Text, Card } from "@gluestack-ui/themed";
+import { i18n } from "../../utils/libs/localization/Localization";
+import { getLocales } from "expo-localization";
 
 export default function PrivatePolicy() {
+  const _language = useSelector((state) => state.loginReducer.language);
+  i18n.locale = getLocales()[_language]?.languageCode;
+
   return (
     <View style={styles.container}>
       <View style={styles.title}>
         <Text size="md" style={styles.shrink}>
-          Petromax Dealer Application values your privacy. When you use our app,
-          we collect:
+          {i18n.t("Policy_heading")},
+          {i18n.t("Policy_collect")}:
         </Text>
       </View>
       <View style={styles.body}>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" bold>
-            Personal Info :
+            {i18n.t("Personal_info")} :
           </Text>
           <Text size="md" style={styles.shrink}>
-            name, phone, email, role{" "}
+            {i18n.t("Personal_info_details")}{" "}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" bold>
-            Order info :
+            {i18n.t("Order_info")} :
           </Text>
           <Text size="md" style={styles.shrink}>
             {" "}
-            order details, payment information
+            {i18n.t("Order_info_details")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" bold>
-            Location :
+            {i18n.t("Location")} :
           </Text>
           <Text size="md" style={styles.shrink}>
             {" "}
-            for account and order processing
+            {i18n.t("Location_details")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" bold>
-            Cookies :
+            {i18n.t("Cookies")} :
           </Text>
           <Text size="md" style={styles.shrink}>
             {" "}
-            improve your experience
+            {i18n.t("Cookies_details")}
           </Text>
         </View>
       </View>
@@ -62,41 +68,39 @@ export default function PrivatePolicy() {
             marginHorizontal: 15,
           }}
         >
-          We use this information to :
+          {i18n.t("use")} :
         </Text>
       </View>
       <View style={styles.body}>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Create and manage your account
+          {i18n.t("use_1")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Process and deliver your orders
+          {i18n.t("use_2")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Maintain secure access to the system
+          {i18n.t("use_3")}
           </Text>
         </View>
       
       </View>
       <View style={styles.summery}>
         <Text style={styles.shrink}>
-        We do not share your personal information with third parties.
- Your data is stored securely, and you can request to view or delete it at 
- any time by contacting <Text bold>Petromax.HR@shvenergybd.com.</Text>
+        {i18n.t("policy_tail1")}<Text bold>Petromax.HR@shvenergybd.com.</Text>
              
         </Text>
         <Text style={{
             marginVertical : 20 
         }}>
-        By using the app, you agree to this Privacy Policy.
+        {i18n.t("policy_tail2")}
              
         </Text>
 

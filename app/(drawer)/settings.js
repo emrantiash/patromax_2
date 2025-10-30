@@ -5,31 +5,38 @@ import { Card, Icon, CalendarDaysIcon, Switch ,Text,PlayIcon} from "@gluestack-u
 import SelectBox from "../component/select/SelectBox";
 import { setLanguage, setLanguageName } from "../redux/slices/loginSlice";
 import { router } from "expo-router";
+import { i18n } from "../utils/libs/localization/Localization";
 
 const data = [
   {
     id  : 1 ,
     value : "0",
     name : "English"
-  },
-  // {
-  //   id :  2 , 
-  //   value : "1",
-  //   name : "Bangla"
-  // }
+  }
+  ,
+  {
+    id :  2 , 
+    value : "1",
+    name : "Bangla"
+  }
 ]
 
 export default function settings() {
   const dispatch = useDispatch()
 
-  const _language =  useSelector((state)=>state.loginReducer.language_name)
+  const _language =  useSelector((state)=>state.loginReducer.language)
 
-  const [mylanguage,setMylanguage] = useState(0)
+  // console.log(_language)
+
+  const [mylanguage,setMylanguage] = useState(useSelector((state)=>state.loginReducer.language))
 
   const selectedValue =(value) =>{
-    // dispatch(setLanguage(parseInt(value)))
+    dispatch(setLanguage(parseInt(value)))
     // dispatch(setLanguageName(name))
+    // setMylanguage(parseInt(value))
   }
+
+  // console.log(mylanguage)
 
   const _policy = (_link) =>{
     router.push(_link)
@@ -56,7 +63,7 @@ export default function settings() {
           />
           <Text className="m-3 p-3"  size="lg">
             {" "}
-            App Setting{" "}
+            {i18n.t("App_setting")}{" "}
           </Text>
         </View>
         {/* <View style={styles.innerBody}>
@@ -74,9 +81,9 @@ export default function settings() {
           />
         </View> */}
         <View style={styles.innerBody}>
-          <Text size="md"> Language </Text>
+          <Text size="md">  {i18n.t("Language")} </Text>
           <SelectBox 
-          defaultValue={"English"}
+          defaultValue={mylanguage=== 1 ? i18n.t("Bangla") : i18n.t("English")  }
           data={data}
           selectedValue={selectedValue}
           // thisValue = {_language}
@@ -108,21 +115,21 @@ export default function settings() {
             // marginBottom :  5
           }} >
             {" "} 
-            Help and Terms of Service{" "}
+            {i18n.t("H_T_A_S")}{" "}
           </Text>
         </View>
         <TouchableOpacity style={styles.innerBody} onPress={()=>_policy("screen/policy/PrivatePolicy")}>
-          <Text size="md"> Private policy</Text>
+          <Text size="md"> {i18n.t("P_policy")}</Text>
           
         </TouchableOpacity>
         <TouchableOpacity style={styles.innerBody}
          onPress={()=>_policy('screen/services/Services')}
          >
-          <Text size="md"> Terms of service </Text>
+          <Text size="md"> {i18n.t("T_A_S")} </Text>
           
         </TouchableOpacity>
         <TouchableOpacity style={styles.innerBody} onPress={()=>_policy('screen/support/Support')}>
-          <Text size="md"> Contact support </Text>
+          <Text size="md">{i18n.t("C_S")} </Text>
           
         </TouchableOpacity>
       </Card>

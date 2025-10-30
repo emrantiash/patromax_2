@@ -1,7 +1,7 @@
 import { View, StyleSheet, Dimensions, KeyboardAvoidingView, Platform } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signIn, setLanguage, getOtp, testPost, setLanguageName ,signout, getLogin} from "../../redux/slices/loginSlice";
+import { signIn, setLanguage, getOtp, testPost, setLanguageName ,signout, getLogin,getLogout} from "../../redux/slices/loginSlice";
 import InputBox from "../../component/input/Input";
 import ButtonBox from "../../component/button/Button";
 import ImageItem from "../../component/image/ImageItem";
@@ -16,23 +16,32 @@ import {
 import { getDashboard } from "../../redux/slices/historySlice";
 import { router, Link } from "expo-router";
 import PSpinner from "../../component/spinner/Spinner";
+import { getLocales } from "expo-localization";
+import { i18n } from "../../utils/libs/localization/Localization";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
+import * as Font from "expo-font";
+// import *  from '../../../assets/fonts/HindSiliguri'
+
 
 export default function LoginScreen() {
   const dispatch = useDispatch();
+  const _language = useSelector((state) => state.loginReducer.language) || 0;
+  i18n.locale = getLocales()[_language]?.languageCode;
+  console.log(i18n.locale)
   const [isLoading, setIsLoading] = useState(false);
   const msg = useSelector((state)=>state.loginReducer.isError)
   const [object, setObject] = useState({
-    email: "",
-    password: "",
+    email: "mdk058@demo.com",
+    password: "demo12345@",
   });
   const toast = useToast();
   const [toastId, setToastId] = useState(0);
 
-  // useEffect(()=>{
-  //   dispatch(signout())
-  // },[])
+  useEffect(()=>{
+    dispatch(getLogout())
+    dispatch(signout())
+  },[])
 
   const handleToast = (data) => {
     if (!toast.isActive(toastId)) {
@@ -88,7 +97,9 @@ export default function LoginScreen() {
     
     else {
       setIsLoading(true);
-      dispatch(setLanguage(0));
+      
+      //  dispatch(setLanguage(0)); // 1 for bangla , 0 for English
+
       // dispatch(setLanguageName("English"))
       const option = {
         usr: object.email,
@@ -98,6 +109,7 @@ export default function LoginScreen() {
 
       // <--- without OTP ---->
       dispatch(getLogin(option)).then(function (e) {
+        console.log(e.payload)
         setIsLoading(false);
         if (e.payload?.message && e.payload?.message.message == "Logged In") {
           let option = {
@@ -136,21 +148,17 @@ export default function LoginScreen() {
   >
       <View style={styles.imageBox}>
         <ImageItem
-          // src={require('../../../assets/images/logo/petromax.png')}
           src="https://petromax-test.s3.ap-south-1.amazonaws.com/petromax.png"
           size="lg"
         />
       </View>
-     {/* <Text size="sm">Error is : {msg}</Text>  */}
       <View style={styles.inBetween}>
         <InputBox
           isLabel
-          label="Email"
+          label={i18n.t("Email")}
           borderRadius={15}
-          //  variant="rounded"
-          //  size="2xl"
           height={(height * 6) / 100}
-          placeholder={"Enter Email"}
+          placeholder={i18n.t("Enter_email")}
           name="email"
           setInputValue={setInputValue}
         />
@@ -158,24 +166,21 @@ export default function LoginScreen() {
       <View style={styles.inBetween}>
         <InputBox
           isLabel
-          label="Password"
+          label={i18n.t("Password")}
           borderRadius={15}
-          // variant="rounded"
           height={(height * 6) / 100}
-          placeholder={"Enter Password"}
+          placeholder={i18n.t("Enter_pass")}
           isPasswordField
           name="password"
           setInputValue={setInputValue}
         />
       </View>
       <View style={styles.rememberTab}>
-        {/* <Text>Remember me</Text>
-        <Text>Forget Password</Text> */}
       </View>
       <View style={styles.inBetween}>
         <ButtonBox
           variant="solid"
-          text="Log In"
+          text={i18n.t("Log_In")}
           size="lg"
           action={"negative"}
           borderRadius={8}
@@ -185,6 +190,9 @@ export default function LoginScreen() {
           // width = {'90%'}
         />
       </View>
+      {/* <Text style={{ fontFamily : 'NotoSansBengali'   }}>
+        {i18n.t("A_D_B")}
+      </Text> */}
       <View style={styles.signupText}>
         {/* <Text size="xs" style={styles.textDown}>
           Don't have an Account?{" "}

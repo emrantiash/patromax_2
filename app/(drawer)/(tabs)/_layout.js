@@ -33,7 +33,7 @@ export default function _layout() {
     };
 
     dispatch(getNotification(option)).then(function (e) {
-      setnoti(e.payload.message.changed_sales_orders);
+      setnoti(e?.payload?.message?.changed_sales_orders);
     });
   }, []);
   return (
@@ -50,9 +50,9 @@ export default function _layout() {
             <FontAwesome size={28} name="home" color={color} />
           ),
 
-          tabBarTitle: "Home",
-          title: i18n.t("Home"),
-          headerTitle: "Home", // i18n.t('Home')
+          tabBarTitle: i18n.t("Home"),
+          // title: i18n.t("Home"),
+          headerTitle: i18n.t("Home"), // i18n.t('Home')
           tabBarLabelStyle: {
             color: "#DF2B2A", //red
           },
@@ -95,7 +95,7 @@ export default function _layout() {
           title: i18n.t("History"),
           tabBarTitle: "History",
           // headerTitle : i18n.t('Profile'),
-          headerTitle: "History",
+          headerTitle: i18n.t("History"),
           tabBarLabelStyle: {
             color: "#DF2B2A",
           },

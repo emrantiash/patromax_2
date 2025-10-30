@@ -21,6 +21,8 @@ import { getDashboard ,getActiveOrder} from "../../../redux/slices/historySlice"
 import { router } from "expo-router";
 import useConfig from "../../../lib/hook/config";
 import { useFocusEffect } from "@react-navigation/native";
+import { getLocales } from "expo-localization";
+import { i18n } from "../../../utils/libs/localization/Localization";
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
@@ -50,6 +52,9 @@ const barData = [
 export default function index() {
   const dispatch = useDispatch();
   const config = useConfig();
+  const _language = useSelector((state) => state.loginReducer.language)  ;
+  i18n.locale = getLocales()[_language]?.languageCode;
+   console.log(_language,i18n.locale)
   let newDate = new Date();
     let date = newDate.getDate();
     let month = newDate.toLocaleString('default', { month: 'long' });;
@@ -58,6 +63,8 @@ export default function index() {
 
   const [data,setData] = useState(barData) //useState(useSelector((state)=>state.historyReducer.data))
   const [info,setInfo] = useState([])
+
+  
 
   const handleBackPress = ()=>{
     Alert.alert('Exit App','Are you sure to exit?',[
@@ -88,6 +95,8 @@ export default function index() {
       customer : config[2]
     }
 
+    // console.log("==== the options "+option)
+
     dispatch(getDashboard(option)).then(function(e){
       let _array = e.payload?.message?.weekly_data
       // setData(e.payload.message.weekly_data)
@@ -106,6 +115,8 @@ export default function index() {
    
     
   }, []);
+
+  // console.log("====data========="+JSON.stringify(data))
 
   
 
@@ -126,24 +137,25 @@ export default function index() {
         translucent={true}
         barStyle="light-content"
       />
+     
       <Card style={styles.headerTop}>
         <View style={styles.upperCard}>
           <Text size="lg" bold>
-            Welcome, {config[1]?.first_name + ' '  + config[1]?.last_name} !
+            {i18n.t("Welcome")}, {config[4]} !
           </Text>
-          <Text size="sm">Here's what you need to know today</Text>
+          <Text size="sm">{i18n.t("what_to_know")}</Text>
         </View>
         <View style={styles.upperCard}>
           <View style={styles.upperInside}>
             <Text size="lg" bold>
-              Total Purchase
+              {i18n.t("total_purchase")}
             </Text>
             <Text size="lg" bold>
               {__mydate}
             </Text>
           </View>
 
-          <Text size="sm">Tk: {Math.round(info?.total_spent_since_last_month)}</Text>
+          <Text size="sm">{i18n.t("tk")}: {Math.round(info?.total_spent_since_last_month)}</Text>
         </View>
       </Card>
       <Card style={styles.header}>
@@ -195,7 +207,7 @@ export default function index() {
           >
             <View style={styles.lowerInsideFirst}>
               <View>
-                <Text size="md">{month} Orders</Text>
+                <Text size="md">{month} {i18n.t("Orders")}</Text>
               </View>
 
               <View
@@ -256,7 +268,7 @@ export default function index() {
                   alignItems: "center",
                 }}
               >
-                <Text size="md">Total Orders</Text>
+                <Text size="md">{i18n.t("Total") + " " + i18n.t("Orders")} </Text>
                 <MaterialIcons
                   name="arrow-forward-ios"
                   size={15}

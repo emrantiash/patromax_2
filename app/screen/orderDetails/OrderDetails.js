@@ -11,13 +11,15 @@ import { useSelector, useDispatch } from "react-redux";
 import BadgeSymbol from "../../component/badge/Badge";
 import {
   Card,
-  Text,
   Icon,
   ArrowRightIcon,
   Divider,
   Progress,
   ProgressFilledTrack,
   Badge,
+  Text,
+  Textarea,
+  TextareaInput
 } from "@gluestack-ui/themed";
 import {
   setDataStore,
@@ -28,6 +30,7 @@ import {
   submitInvoice,
   image_upload,
 } from "../../redux/slices/cartSlice";
+import { getOutStandingAmount,getPaymentEntries } from "../../redux/slices/orderSlice";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Fontisto from "@expo/vector-icons/Fontisto";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -35,6 +38,8 @@ import { router } from "expo-router";
 import ButtonBox from "../../component/button/Button";
 import useConfig from "../../lib/hook/config";
 import * as Clipboard from "expo-clipboard";
+import { i18n } from "../../utils/libs/localization/Localization";
+import { getLocales } from "expo-localization";
 
 const height = Dimensions.get("window").height;
 const width = Dimensions.get("window").width;
@@ -42,22 +47,87 @@ const width = Dimensions.get("window").width;
 export default function OrderDetails() {
   const config = useConfig();
   const dispatch = useDispatch();
+  const _language = useSelector((state) => state.loginReducer.language);
+  i18n.locale = getLocales()[_language]?.languageCode;
   const data = useSelector((state) => state.orderReducer.data);
   const image = useSelector((state) => state.cartReducer.image);
-  // const warehouse = useSelector((state) => state.productReducer.warehouse);
+  const [totalPayment,setTotalPayment] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [copiedText, setCopiedText] = useState("");
+  const [text,setText] = useState("")
+  const [entries,setEntries] = useState([])
 
   const copyToClipboard = async (data) => {
     await Clipboard.setStringAsync(data);
   };
+
+  const __posting_date = data.posting_date
+
+  //  console.log("========mydate======="+JSON.stringify(data))
+// custom_remarks
 
   const makeCallPayment = () => {
     data.is_previous && dispatch(setDataStore(data));
     dispatch(storeTotal(data?.due?.toString() > 0 ? data?.due : data.total));
     router.push("screen/uploadScreen/UploadScreen");
   };
+
+  useEffect(()=>{
+    let  __total_payment = 0 
+
+    data?.payment_Entry?.map((data)=>{
+      __total_payment = __total_payment + parseFloat(data.amount)
+    })
+    setTotalPayment(parseFloat(__total_payment + data.paid_amount))
+
+    const option = {
+      doctype: "Payment Entry",
+      fields: [
+        "`tabPayment Entry`.`name`",
+        "`tabPayment Entry`.`docstatus`",
+        "`tabPayment Entry`.`idx`",
+        "`tabPayment Entry`.`posting_date`",
+        "`tabPayment Entry`.`custom_sales_order_link_only`",
+        "`tabPayment Entry`.`bank_account`",
+        "`tabPayment Entry`.`custom_from_account`",
+        "`tabPayment Entry`.`paid_from_account_balance`",
+        "`tabPayment Entry`.`paid_to_account_balance`",
+        "`tabPayment Entry`.`paid_amount`",
+        "`tabPayment Entry`.`paid_amount_after_tax`",
+        "`tabPayment Entry`.`received_amount`",
+        "`tabPayment Entry`.`received_amount_after_tax`",
+        "`tabPayment Entry`.`reference_no`",
+        "`tabPayment Entry`.`status`",
+        "`tabPayment Entry`.`title`",
+        "`tabPayment Entry`.`paid_from_account_currency`",
+        "`tabPayment Entry`.`paid_to_account_currency`",
+        "`tabPayment Entry`.`mode_of_payment`"
+      ],
+      filters: [
+        [
+          "Payment Entry",
+          "custom_sales_order_link_only",
+          "=",
+          data?.order?.replace("#", ""),
+        ],
+      ],
+      order_by: "`tabPayment Entry`.`modified` desc",
+      start: 0,
+      page_length: 20,
+      view: "List",
+      group_by: "",
+      with_comment_count: 1,
+    };
+    data?.order && 
+    dispatch(getPaymentEntries(option)).then(function(e){
+       console.log("=======ent======"+(e?.payload.message.length))
+      if(e?.payload.message.length !== 0)
+      setEntries( e?.payload?.message?.values  )
+      // setEntries( e?.payload.message ? e?.payload?.message?.values : [] )
+    })
+  
+  },[])
 
 
   const call_sales_order = () => {
@@ -70,6 +140,7 @@ export default function OrderDetails() {
       // __islocal: 1,
       // __unsaved: 1,
       // owner: "Administrator",
+      custom_remarks : text ,
       title: config[2],
       naming_series: "SAL-ORD-.YYYY.-",
       order_type: "Sales",
@@ -132,14 +203,12 @@ export default function OrderDetails() {
         warehouse: "Stores - PM",
         income_account: "Sales - PM",
         expense_account: "Cost of Goods Sold - PM",
-        discount_account: null,
         provisional_expense_account: null,
         has_serial_no: 0,
         has_batch_no: 0,
         batch_no: null,
-        uom: "PCS",
+        uom: data.productType,
         min_order_qty: "",
-        discount_percentage: 5,
         update_stock: 0,
         is_fixed_asset: 0,
         last_purchase_rate: 0,
@@ -239,12 +308,23 @@ export default function OrderDetails() {
   const payment = (reference_name) => {
     data.order && setIsLoading(true);
     // console.log("====payment called====", data);
-    // console.log("bank"+data.bank.split(":")[0])
+    const __option = {
+      dt: "Sales Order",
+      dn: reference_name.replace("#",""),
+    };
+
+    console.log(__option)
+
+
+    dispatch(getOutStandingAmount(__option)).then(function(e){
+     const  __reference_object = e.payload.message.references[0]
+
     const thisdata = {
       // bank
-      bank: data.bank.split(":")[0],
-      bank_account: data.bank.split(":")[1],
-      paid_to: data.bank.split(":")[0] +" - PM",
+      // posting_date : __posting_date,
+      bank: null , //data.bank.split(":")[0],
+      bank_account: null , //data.bank.split(":")[1],
+      paid_to: data.bank +" - PM", //data.bank.split(":")[0] +" - PM",
       paid_to_account_type: "Bank",
       mode_of_payment: "Wire Transfer",
       custom_from_account: data.myaccount,
@@ -257,7 +337,8 @@ export default function OrderDetails() {
       naming_series: "ACC-PAY-.YYYY.-",
       payment_type: "Receive",
       payment_order_status: "Initiated",
-      posting_date: data.date_use,
+      posting_date: data.posting_date,
+      mode_of_payment : data.mode_of_payment,
       company: "Petromax",
       party_type: "Customer",
       party: config[2],
@@ -267,15 +348,14 @@ export default function OrderDetails() {
       party_balance: config[3].account_balance,
       paid_from: "Debtors - PM",
       paid_from_account_type: "Receivable",
+      custom_sales_order_link_only : reference_name.replace("#", ""),
       paid_from_account_currency: "BDT",
       paid_from_account_balance: Number(data.paid_amount),
-        // paid_to: "Cash - PM",
-         // paid_to_account_type: "Cash",
       paid_to_account_currency: "BDT",
       paid_to_account_balance: Number(data.paid_amount),
-      paid_amount: Number(data.paid_amount),
-      base_paid_amount: Number(data.paid_amount),
-      received_amount: Number(data.paid_amount),
+      paid_amount:  Number(data.paid_amount), // paid amount
+      base_paid_amount:  Number(data.paid_amount), // ""
+      received_amount: Number(data.paid_amount), // ""
       paid_amount_after_tax: 0,
       source_exchange_rate: 1,
       base_paid_amount_after_tax: 0,
@@ -283,9 +363,9 @@ export default function OrderDetails() {
       target_exchange_rate: 1,
       base_received_amount: Number(data.paid_amount),
       base_received_amount_after_tax: 0,
-      total_allocated_amount: Number(data.paid_amount),
-      base_total_allocated_amount: Number(data.paid_amount),
-      unallocated_amount: 0,
+      total_allocated_amount: totalPayment > data.total ? e.payload.message.references[0].outstanding_amount :  Number(data.paid_amount), // outstanding_amount
+      base_total_allocated_amount: totalPayment > data.total ? e.payload.message.references[0].outstanding_amount : Number(data.paid_amount), // outstanding_amount 
+      unallocated_amount: totalPayment > data.total ? totalPayment - data.total :  0, // extra amount 
       difference_amount: 0,
       apply_tax_withholding_amount: 0,
       base_total_taxes_and_charges: 0,
@@ -295,6 +375,7 @@ export default function OrderDetails() {
       custom_remarks: 0,
       is_opening: "No",
       doctype: "Payment Entry",
+     
       references: [
         {
           docstatus: 0,
@@ -302,9 +383,9 @@ export default function OrderDetails() {
           reference_doctype: "Sales Order",
           reference_name: reference_name.replace("#", ""),
           payment_term_outstanding: 0,
-          total_amount: data.total,
-          outstanding_amount: data.total,
-          allocated_amount: Number(data.paid_amount),
+          total_amount: totalPayment > data.total ? e.payload.message.references[0].total_amount : data.total, // total 
+          outstanding_amount: totalPayment > data.total ? e.payload.message.references[0].outstanding_amount :  data.total,
+          allocated_amount:totalPayment > data.total ? e.payload.message.references[0].allocated_amount :   Number(data.paid_amount), // outstanding_amount
           exchange_rate: 1,
           exchange_gain_loss: 0,
           account: "Debtors - PM",
@@ -312,9 +393,9 @@ export default function OrderDetails() {
           parentfield: "references",
           parenttype: "Payment Entry",
           doctype: "Payment Entry Reference",
-          __islocal: 1,
-          parent: "new-payment-entry-yzskdlfzhq",
-          name: "new-payment-entry-reference-guhklrnkfv",
+          // __islocal: 1,
+          // parent: "new-payment-entry-yzskdlfzhq",
+          // name: "new-payment-entry-reference-guhklrnkfv",
         },
       ],
       deductions: [],
@@ -328,8 +409,13 @@ export default function OrderDetails() {
 
     const option = { doc: JSON.stringify(thisdata), action: "Save" };
 
+    // console.log("===the option is=======",thisdata)
+
+ 
+
     dispatch(postOrder(option)).then(function (e) {
-       console.log("post payment"+e.payload);
+        // console.log("post payment"+JSON.stringify(e.payload));
+        // console.log("post payment");
       if (e.payload.docs[0].name) {
         const name = e.payload.docs[0].name;
         // console.log(image);
@@ -359,9 +445,9 @@ export default function OrderDetails() {
           docstatus: 1,
         };
         const option = [tail, data];
-
+        // console.log("===after submit payment entering to save",option)
         dispatch(submitPayment(option)).then(function (e) {
-           ("===submit paymenty ===", e.payload.data.name);
+          //  console.log("===submit paymenty ===", e.payload?.data);
           if (e.payload.data.name) {
             makeTheCall();
             // salesInvoice(e.payload.data.name, reference_name);
@@ -369,10 +455,11 @@ export default function OrderDetails() {
         });
       } else alert("Something went wrong with payment save");
     });
+  })
+
   };
 
   const makeTheCall = () => {
-    //  setIsLoading(false);
     incrementProgress();
     // setIsComplete(true);
   };
@@ -388,11 +475,9 @@ export default function OrderDetails() {
         const randomNumber = Math.floor(Math.random() * 20);
         const newvalue = prevProgress + randomNumber; // Increment by 10%
         return Math.min(newvalue, 100); // Ensure it doesn't exceed 100%
-        // return i
       });
-      // }
     }, 500);
-    // setIsLoading(false);
+    
   };
 
   useEffect(() => {
@@ -407,7 +492,7 @@ export default function OrderDetails() {
             <View style={styles.header}>
               <View style={styles.headerColumn}>
                 <Text size="lg" style={styles.letter}>
-                  Order ID
+                 {i18n.t("Order_ID")}
                 </Text>
                 <View style={{
                   width : '100%',
@@ -457,16 +542,16 @@ export default function OrderDetails() {
         <Card style={styles.body} variant="elevated">
           <View style={styles.headerColumn2}>
             <Text size="lg" style={[styles.letterHead, styles.letter]} bold>
-              Timeline
+              {i18n.t("Timeline")}
             </Text>
             <View style={styles.dateBody}>
               <Text size="md" style={styles.letter}>
-                Submission Date : {data.date}
+                {i18n.t("Submission_Date")} : {data.date}
               </Text>
 
               {data?.page_status == 1 && (
                 <Text size="md" style={styles.letter} bold>
-                  Last Update : {data.date}
+                  {i18n.t("Last_Update")} : {data.date}
                 </Text>
               )}
               
@@ -477,7 +562,7 @@ export default function OrderDetails() {
           <View>
             <View>
               <Text size="lg" style={styles.letter} bold>
-                Product Details
+                {i18n.t("Product_Details")}
               </Text>
               {data.items?.map((data, index) => (
                 <View style={styles.dataTable} key={index}>
@@ -493,7 +578,7 @@ export default function OrderDetails() {
                     {/* {data.name} | {data.capacity} */}
                     {data.capacity}
                   </Text>
-                  <Text size="sm">(QTY){data.qty || data.quantity}</Text>
+                  <Text size="sm">({data.productType}){data.qty || data.quantity}</Text>
                   <Text size="sm">{data.price} Tk</Text>
                 </View>
               ))}
@@ -502,7 +587,7 @@ export default function OrderDetails() {
               <Divider className="my-0.5" />
             </View>
             <View style={styles.subTotal}>
-              <Text>Total</Text>
+              <Text>{i18n.t("Total")}</Text>
               <Text>{data.subtotal}</Text>
             </View>
             <View
@@ -513,7 +598,7 @@ export default function OrderDetails() {
             {data.page_status == 0 && (
               <View style={styles.subTotal}>
                 <Text size="md" bold>
-                  {data.order ? "Payment" : "Paid"}
+                  {data.order ? i18n.t("Payment") : i18n.t("Paid")}
                 </Text>
                 <Text bold>{data.paid_amount}</Text>
               </View>
@@ -552,11 +637,11 @@ export default function OrderDetails() {
           <Card style={styles.body} variant="elevated">
             <View>
               <Text size="sm" style={[styles.letter, styles.shipping]} bold>
-                Payment History
+                {i18n.t("Payment_History")}
               </Text>
             </View>
 
-            {data.payment_Entry?.map((data, index) => (
+            {entries?.map((data, index) => (
               <View style={styles.dataTable} key={index}>
                 <View
                   style={{
@@ -566,7 +651,7 @@ export default function OrderDetails() {
                 >
                   <Text
                     size="sm"
-                    color="green"
+                    color="#000"
                     style={{
                       justifyContent: "center",
                       alignItems: "center",
@@ -577,30 +662,79 @@ export default function OrderDetails() {
                       size={(height * 2) / 100}
                       color="green"
                     />{" "}
-                    {data.date}
+                    {data[0]}
                   </Text>
                   <Text
                     size="xs"
                     style={{
                       marginHorizontal: 20,
                     }}
-                    color="red"
+                    color="gray"
                   >
-                    {data.dep_slp}
+                    {data[3]}
+                  </Text>
+                  <Text
+                    size="xs"
+                    style={{
+                      marginHorizontal: 20,
+                    }}
+                    color="gray"
+                  >
+                    {data[18] }
+                  </Text>
+                  <Text
+                    size="xs"
+                    style={{
+                      marginHorizontal: 20,
+                    }}
+                    color="gray"
+                  >
+                    {data[5]?.split('-')[0]}
+                  </Text>
+                  <Text
+                    size="xs"
+                    style={{
+                      marginHorizontal: 20,
+                    }}
+                    color="gray"
+                  >
+                    Ref : {data[6]}
                   </Text>
                 </View>
                 <Text size="sm" color="green">
-                  {data.amount} Tk
+                  {data[7]} {i18n.t("tk")}
                 </Text>
               </View>
             ))}
           </Card>
         )}
 
+        {/* remarks */}
+        {
+          // !data?.order &&
+    //       <Card>
+       
+    //     <View className="w-96" style={{
+    //       margin :0
+    //     }}>
+    //       <Text style={{padding : 5}} size="sm" bold>{i18n.t("Remarks")}</Text>
+    //       {/* <Textarea label="Message" onchange={(e)=>textAreaChange(e)} /> */}
+    //       <Textarea isReadOnly={data.is_previous}>
+    //         <TextareaInput placeholder=""
+    //         value={text}
+    //         onChangeText={setText}
+    //         />
+    // </Textarea>
+    //     </View>
+
+    //     </Card>
+        }
+        
+
         <Card style={styles.body} variant="elevated">
           <View>
             <Text size="sm" style={[styles.letter, styles.shipping]} bold>
-              Shipping Point
+              {i18n.t("Shipping_Point")}
             </Text>
           </View>
           <View style={styles.dateBody}>
@@ -610,6 +744,7 @@ export default function OrderDetails() {
             {/* <Text size="sm">Contact : 01765667656</Text> */}
           </View>
         </Card>
+
       </ScrollView>
       {/* {isLoading && (
           <Card> 
@@ -643,7 +778,7 @@ export default function OrderDetails() {
             // disabled={isLoading}
           >
             <Text size="lg" color="white">
-              Submit
+              {i18n.t("Submit")}
               {/* <AntDesign name="arrowright" size={12} color="red" /> */}
             </Text>
           </TouchableOpacity>
@@ -656,7 +791,7 @@ export default function OrderDetails() {
             }
           >
             <Text size="lg" color="white">
-              Payment
+              {i18n.t("Payment")}
               <AntDesign name="arrowright" size={12} color="white" />
             </Text>
           </TouchableOpacity>
@@ -666,7 +801,7 @@ export default function OrderDetails() {
   ) : (
     <View style={styles.successContainer}>
       <AntDesign name="checkcircleo" size={55} color="green" />
-      <Text size="lg"> Order Created Successfully </Text>
+      <Text size="lg"> {i18n.t("O_C_S")}</Text>
       <View
         style={{
           marginVertical: 10,
@@ -674,7 +809,7 @@ export default function OrderDetails() {
       >
         <ButtonBox
           action={"negative"}
-          text="Go Home"
+          text={i18n.t("G_H")}
           fontColor="#fff"
           onClick={goHome}
         />

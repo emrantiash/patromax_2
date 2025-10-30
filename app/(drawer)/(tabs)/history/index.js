@@ -1,4 +1,4 @@
-import { View, StyleSheet, FlatList ,Dimensions} from "react-native";
+import { View, StyleSheet, FlatList ,Dimensions,RefreshControl} from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Card, Text } from "@gluestack-ui/themed";
@@ -43,16 +43,28 @@ export default function Page() {
   const config = useConfig();
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [status,setStatus] = useState("")
-  const _language = useSelector((state) => state.loginReducer.language);
+  const _language = useSelector((state) => state.loginReducer.language) || 0 ;
   i18n.locale = getLocales()[_language].languageCode;
   const [data, setData] = useState([]);
-  let value = useEffect(() => {
+
+  useEffect(() => {
+   makeTheCall()
+  }, []);
+
+  const  makeTheCall = () =>{
     const option = {
       customer: config[2],
     };
     getDataCall(option);
-  }, []);
+  }
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    makeTheCall();
+    setRefreshing(false);
+  };
 
   const getDataCall = (option) => {
     setIsLoading(true)
@@ -144,6 +156,12 @@ export default function Page() {
           />
         )}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+          />
+      }
         //   ListHeaderComponent = {() => (
         //     <Text style={styles.text}>{i18n.t('Past')} {i18n.t('Orders')}</Text>
         // )}

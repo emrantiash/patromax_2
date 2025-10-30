@@ -5,9 +5,12 @@ import { signout } from "../redux/slices/loginSlice";
 import { Drawer } from "expo-router/drawer";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Fontisto from '@expo/vector-icons/Fontisto';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { getLogout } from "../redux/slices/loginSlice";
+import SimpleLineIcons from '@expo/vector-icons/SimpleLineIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router, usePathname } from "expo-router";
 import useConfig from "../lib/hook/config";
@@ -21,13 +24,14 @@ const CustomDrawerContent = (props) => {
   const config = useConfig();
   const pathname = usePathname();
   const dispatch = useDispatch()
-  const _language = useSelector((state)=>state.loginReducer.language )  ;
+  const _language =  useSelector((state)=>state.loginReducer.language)  || 0 ;
   i18n.locale = getLocales()[_language]?.languageCode
 
   useEffect(() => {
   }, [pathname]);
 
   const _logout =()=>{
+    dispatch(getLogout())
     dispatch(signout())
     router.push("/")
   }
@@ -43,13 +47,13 @@ const CustomDrawerContent = (props) => {
     >
       <View style={styles.userInfoWrapper}>
         <Image
-          source={{ uri: "https://petromax-test.s3.ap-south-1.amazonaws.com/307ce493-b254-4b2d-8ba4-d12c080d6651+1.png" }}
+          source={{ uri: "https://petromax-test.s3.ap-south-1.amazonaws.com/Petromax-1609003.png" }}
           width={80}
           height={80}
           style={styles.userImg}
         />
         <View style={styles.userDetailsWrapper}>
-          <Text style={styles.userName}>{config[1]?.first_name + ' '  + config[1]?.last_name}</Text>
+          <Text style={styles.userName}>{config[4]}</Text>
           <Text style={styles.userEmail}>{config[1]?.email}</Text>
         </View>
       </View>
@@ -57,7 +61,7 @@ const CustomDrawerContent = (props) => {
         icon={({ color, size }) => (
             <FontAwesome name="feed" size={image_size} color={pathname == "/home" ? "#fff" : "#DF2B2A"} />
         )}
-        label={"Home"}
+        label={i18n.t("Home")}
         labelStyle={[
           styles.navItemLabel,
           { color: pathname == "/home" ? "#fff" : "#000" },
@@ -156,7 +160,7 @@ const CustomDrawerContent = (props) => {
         icon={({ color, size }) => (
             <AntDesign name="setting" size={image_size} color={pathname == "/settings" ? "#fff" : "#DF2B2A"} />
         )}
-        label={"Settings"}
+        label={i18n.t("Setting")}
         labelStyle={[
           styles.navItemLabel,
           { color: pathname == "/settings" ? "#fff" : "#000" },
@@ -166,13 +170,44 @@ const CustomDrawerContent = (props) => {
           router.push("/settings");
         }}
       />
+      {/* about hsv energy */}
+      <DrawerItem
+        icon={({ color, size }) => (
+            <SimpleLineIcons name="energy" size={24} color={pathname == "/energy" ? "#fff" : "#DF2B2A"} />
+        )}
+        label={i18n.t("About_SHV_Energy")}
+        labelStyle={[
+          styles.navItemLabel,
+          { color: pathname == "/energy" ? "#fff" : "#000" },
+        ]}
+        style={{ backgroundColor: pathname == "/energy" ? "#DF2B2A" : "#fff" }}
+        onPress={() => {
+          router.push("/energy");
+        }}
+      />
+       <DrawerItem
+        icon={({ color, size }) => (
+            // <SimpleLineIcons name="about" size={24} color={pathname == "/about" ? "#fff" : "#DF2B2A"} />
+            <FontAwesome6 name="people-group" size={24} color={pathname == "/about" ? "#fff" : "#DF2B2A"} />
+        )}
+        label={i18n.t("About_Us")}
+        labelStyle={[
+          styles.navItemLabel,
+          { color: pathname == "/aboutus" ? "#fff" : "#000" },
+        ]}
+        style={{ backgroundColor: pathname == "/aboutus" ? "#DF2B2A" : "#fff" }}
+        onPress={() => {
+          router.push("/aboutus");
+        }}
+      />
+
        <DrawerItem
         icon={({ color, size }) => (
             // <AntDesign name="logout" size={image_size} color="#DF2B2A" />
             <MaterialCommunityIcons name="logout" size={image_size} color="#DF2B2A" />
             
         )}
-        label={"Log out"}
+        label={i18n.t("Log_out")}
         labelStyle={[
           styles.navItemLabel,
            { color:  "#000" },
@@ -201,7 +236,7 @@ export default function Layout() {
       },
       headerTintColor : '#fff',
       headerTitleStyle: {
-        fontWeight: 'bold',
+        // fontWeight: 'bold',
       }
     }}
     >
@@ -209,7 +244,9 @@ export default function Layout() {
        <Drawer.Screen name="orderHistory" options={{headerShown: true,title : "Order History"}} />
        <Drawer.Screen name="profile" options={{headerShown: true,title : "Profile"}} />
       <Drawer.Screen name="favourites" options={{headerShown: true,title : "Statement"}} />
-      <Drawer.Screen name="settings" options={{headerShown: true,title : "Setting"}} />
+      <Drawer.Screen name="settings" options={{headerShown: true,title : i18n.t("Setting")}} />
+      <Drawer.Screen name="energy" options={{headerShown: true,title : i18n.t("About_SHV_Energy")}} />
+      <Drawer.Screen name="aboutus" options={{headerShown: true,title : i18n.t("About_Us")}} />
       <Drawer.Screen name="logout" options={{headerShown: true}} />
     </Drawer>
   );
@@ -233,6 +270,10 @@ const styles = StyleSheet.create({
     borderRadius: 40,
   },
   userDetailsWrapper: {
+    display : 'flex',
+    flexWrap : 'wrap',
+    flexShrink : 1,
+    minWidth : 'auto',
     marginTop: 25,
     marginLeft: 10,
   },

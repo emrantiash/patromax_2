@@ -13,7 +13,12 @@ const Endpoint = {
   paymentSubmit: ["resource/Payment Entry"],
   invoiceSubmit: ["resource/Sales Invoice"],
   upload_image: ["method/upload_file"],
-  bank_name: ["method/frappe.desk.search.search_link"],
+  payment_method: ["method/frappe.desk.search.search_link"],
+  payment_entries : ["method/frappe.desk.reportview.get"],
+  bank_name : ["method/erpnext.accounts.utils.get_children"],
+  wareHouse : ["method/petromax.ware.house"],
+  outstanding : ["method/erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry"],
+  makelogout : ["method/petromax.log.out"]
 };
 
 export default Endpoint;

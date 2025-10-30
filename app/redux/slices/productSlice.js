@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Endpoint from "../../utils/path/Path";
-import { post } from "../../utils/query/Query";
+import {get, post } from "../../utils/query/Query";
 
 export const getWareHouse = createAsyncThunk('get-warehouse', async (data) => {
 
   try {
-    const response = await post(Endpoint.bank_name, data)
+    const response = await get(Endpoint.wareHouse, data)
     return response.data
   }
   catch (error) {
@@ -40,19 +40,19 @@ export const productSlice = createSlice({
     }
   },
   extraReducers: (builder) => {
-    builder.addCase(getWareHouse.pending, (state) => {
-      state.isLoading = true; // Set loading state
-    });
+    // builder.addCase(getWareHouse.pending, (state) => {
+    //   state.isLoading = true; // Set loading state
+    // });
 
-    builder.addCase(getWareHouse.fulfilled, (state, action) => {
-      state.isLoading = false; // Loading finished
-      state.warehouse = wareHouseName(action.payload.message)
-    });
+    // builder.addCase(getWareHouse.fulfilled, (state, action) => {
+    //   state.isLoading = false; // Loading finished
+    //   state.warehouse = wareHouseName(action.payload.message)
+    // });
 
-    builder.addCase(getWareHouse.rejected, (state,action) => {
-      state.login = false; // Reset login status
+    // builder.addCase(getWareHouse.rejected, (state,action) => {
+    //   state.login = false; // Reset login status
       
-    });
+    // });
   },
   
 })
@@ -68,7 +68,7 @@ function wareHouseName(data){
   let arr = [];
   data.map((data, index) =>
     arr.push({
-      name : data.value,
+      name : data.value.split("PM"),
       value : data.value
     }),
   );

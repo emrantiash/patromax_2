@@ -27,6 +27,18 @@ export const getLogin = createAsyncThunk('get-login', async (data) => {
 
 })
 
+export const getLogout = createAsyncThunk('get-logout', async (data) => {
+  try {
+    // const response = await noHeaderpost(Endpoint.varify, data) // with OTP
+    const response = await noHeaderpost(Endpoint.makelogout, data) // without OTP
+    return response.data
+  }
+  catch (error) {
+    return error.response.data
+  }
+
+})
+
 
 
 const initialStateValues = {
@@ -42,6 +54,7 @@ const initialStateValues = {
   language : 0 ,
   language_name : "English",
   full_name : "",
+  use_name  : "",
   challenge_id : ""
 }
 
@@ -50,14 +63,19 @@ export const loginSlice = createSlice({
   initialState: initialStateValues,
   reducers: {
     signout: (state, action) => {
-      console.log("signout called")
-      state.login = false
+      state.login = false,
+      state.token = "",
+      state.data = [],
+      state.info = [],
+      state.full_name = "",
+      state.use_name = "",
+      state.challenge_id = ""
     },
     signIn : (state,action) => {
       state.login  = true 
     },
     setLanguage : (state,action) =>{
-      state.language =  action.payload
+      state.language =  action.payload || 0
       
     },
     setLanguageName : (state,action) =>{
@@ -91,7 +109,8 @@ export const loginSlice = createSlice({
       state.login = action.payload.message.message == "Logged In" ? true : false ; // Set login status
       state.data = action.payload.message.user_details;
       state.info = action.payload.message.due;
-      state.full_name = action.payload.message.customer_name
+      state.full_name = action.payload.message.customer_name;
+      state.use_name = action.payload.message.full_name;
       const { api_key, api_secret } = action.payload.key_details || {};
       const token = `${api_key}:${api_secret}`; // Set token
       state.token = token;

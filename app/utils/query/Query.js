@@ -52,7 +52,7 @@ export function get(end) {
 
 export function customget(end, data) {
   const headers = getHeaderFunction();
-  Network.network + end + data, { headers };
+  // console.log(Network.network + end + data, { headers });
   return axios.get(Network.network + end + data, { headers });
 }
 
@@ -74,7 +74,7 @@ export function noHeaderpost(end, data) {
 
 export function post(end, data) {
   const headers = getHeaderFunction();
-  //  console.log(Network.network + end, data, { headers })
+  // console.log(Network.network + end, data, { headers })
   return axios.post(Network.network + end, data, { headers });
 }
 

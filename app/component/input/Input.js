@@ -3,7 +3,7 @@ import React,{useState} from 'react'
 import { VStack,Heading,Text,Input,InputField,InputIcon, InputSlot,EyeIcon, EyeOffIcon  } from '@gluestack-ui/themed'
 
 export default function InputBox({size,placeholder,isPasswordField,label,labelSize,text,name,setInputValue,width,height,
-  isnumber,isLabel,isReadOnly,value,fontSize,variant,color,labelColor,borderRadius,textAlign}) {
+  isnumber,isLabel,isReadOnly,value,fontSize,variant,color,labelColor,borderRadius,textAlign,isDisabled}) {
     const [showPassword, setShowPassword] = useState(false)
     const handleState = () => {
       setShowPassword((showState) => {
@@ -28,7 +28,7 @@ export default function InputBox({size,placeholder,isPasswordField,label,labelSi
       <Input     
       variant={variant}
       size={size}
-      isDisabled={false}
+      isDisabled={isDisabled}
       isInvalid={false}
       width={width}
       height={height}

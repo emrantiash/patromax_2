@@ -12,6 +12,33 @@ export const getBankName = createAsyncThunk("bank-name", async (data) => {
   }
 });
 
+export const getPaymentMethod = createAsyncThunk("payment-method", async (data) => {
+  try {
+    const response = await post(Endpoint.payment_method, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+export const getPaymentEntries = createAsyncThunk("payment-method", async (data) => {
+  try {
+    const response = await post(Endpoint.payment_entries, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
+export const getOutStandingAmount = createAsyncThunk("out-standing", async (data) => {
+  try {
+    const response = await post(Endpoint.outstanding, data);
+    return response.data;
+  } catch (error) {
+    return error.response.data;
+  }
+});
+
 const initialStateValues = {
   login: false,
   success: false,
@@ -37,19 +64,19 @@ export const orderSlice = createSlice({
    
   },
   extraReducers: (builder) => {
-    builder.addCase(getBankName.pending, (state) => {
-      state.isLoading = true; // Set loading state
-    });
+    // builder.addCase(getBankName.pending, (state) => {
+    //   state.isLoading = true; // Set loading state
+    // });
 
-    builder.addCase(getBankName.fulfilled, (state, action) => {
-      state.isLoading = false; // Loading finished
-      state.banks = bankName(action.payload.message)
-    });
+    // builder.addCase(getBankName.fulfilled, (state, action) => {
+    //   state.isLoading = false; // Loading finished
+    //   state.banks = bankName(action.payload.message)
+    // });
 
-    builder.addCase(getBankName.rejected, (state,action) => {
-      state.login = false; // Reset login status
+    // builder.addCase(getBankName.rejected, (state,action) => {
+    //   state.login = false; // Reset login status
       
-    });
+    // });
   },
 });
 

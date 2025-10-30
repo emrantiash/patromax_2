@@ -1,70 +1,20 @@
-import { GluestackUIProvider, Box } from "@gluestack-ui/themed";
-import { config } from "@gluestack-ui/config";
+
+import React,{useEffect,useRef} from "react";
+import { StyleSheet, View,Text, Button, Platform,AppState } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, View, Button, Platform,AppState } from "react-native";
-import React,{useEffect,useRef,useState} from "react";
-import { store } from "./redux/store";
-import { Provider, useSelector,useDispatch } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { persistStore } from "redux-persist";
 import { Stack, router } from "expo-router";
-import { signout } from "./redux/slices/loginSlice";
-import { useAutoLogout } from "./lib/hook/useAutoLogout";
-import { i18n } from "./utils/libs/localization/Localization";
+import { useSelector } from 'react-redux';
+import { i18n } from '../utils/libs/localization/Localization';
 import { getLocales } from "expo-localization";
-import Routes from "./component/route";
-import * as SplashScreen from "expo-splash-screen";
-import * as Font from "expo-font";
 
+export default function Routes() {
+  const _language = useSelector((state) => state.loginReducer.language)  ;
+  i18n.locale =  getLocales()[_language]?.languageCode || 'en';
 
-SplashScreen.preventAutoHideAsync();
-
-let persistor = persistStore(store);
-
-export default function _layout(){
-
-  const [fontsLoaded, setFontsLoaded] = React.useState(false);
-  
-
-  React.useEffect(() => {
-    async function prepare() {
-      try {
-        await Font.loadAsync({
-          "NotoSansBengali": require("../assets/fonts/NotoSansBengali-Regular.ttf"),
-        });
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        setFontsLoaded(true);
-        await SplashScreen.hideAsync();
-      }
-    }
-    prepare();
-  }, []);
-
-  console.log("===="+fontsLoaded)
-
-  // if (!fontsLoaded) {
-  //   return null;
-  // }
- 
-  // const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
-  // const appState = useRef(AppState.currentState);
-
-  const handleLogout = () => {
-    // Implement your logout logic here
-    // Clear user data, navigate to login screen, etc.
-    router.push('/screen/loginScreen/LoginScreen');
-  };
-
-  const panHandlers = useAutoLogout(handleLogout);
- 
+  const backIcon = Platform.OS === "ios" ? "chevron-back" : "arrow-back-sharp";
+  const appState = useRef(AppState.currentState);
   return (
-    <Provider store={store} {...panHandlers}>
-      <PersistGate persistor={persistor}>
-        <GluestackUIProvider config={config}>
-          <Routes />
-          {/* <Stack
+    <Stack
             screenOptions={{
               headerStyle: {
                 backgroundColor: "#DF2B2A",
@@ -115,7 +65,7 @@ export default function _layout(){
             
               name="screen/orderDetails/OrderDetails"
               options={{
-                title: "Order Details",
+                title: i18n.t("Order_Details"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                 },
@@ -157,7 +107,7 @@ export default function _layout(){
             <Stack.Screen
               name="screen/cart/Cart"
               options={{
-                title: "Cart",
+                title: i18n.t("Cart"),
                 headerLeft: () => (
                   <Ionicons
                     name={backIcon}
@@ -171,7 +121,7 @@ export default function _layout(){
             <Stack.Screen
               name="screen/uploadScreen/UploadScreen"
               options={{
-                title: " Payment",
+                title: i18n.t("Payment"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                   color: "#fff",
@@ -192,7 +142,7 @@ export default function _layout(){
             <Stack.Screen
               name="screen/activeScreen/ActiveScreen"
               options={{
-                title: " Active Order",
+                title: i18n.t("Active_Order"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                   color: "#fff",
@@ -213,7 +163,7 @@ export default function _layout(){
              <Stack.Screen
               name="screen/policy/PrivatePolicy"
               options={{
-                title: " Private Policy",
+                title: i18n.t("P_policy"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                   color: "#fff",
@@ -234,7 +184,7 @@ export default function _layout(){
              <Stack.Screen
               name="screen/services/Services"
               options={{
-                title: " Terms of Services",
+                title: i18n.t("T_A_S"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                   color: "#fff",
@@ -255,7 +205,7 @@ export default function _layout(){
              <Stack.Screen
               name="screen/support/Support"
               options={{
-                title: " Support",
+                title: i18n.t("C_S"),
                 headerStyle: {
                   backgroundColor: "#DF2B2A",
                   color: "#fff",
@@ -296,16 +246,6 @@ export default function _layout(){
             />
             <Stack.Screen name="blog/index" options={{ headerTitle: "Blog" }} />
             <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-          </Stack> */}
-        </GluestackUIProvider>
-      </PersistGate>
-    </Provider>
-  );
-};
-
-// export default _layout;
-
-const styles = StyleSheet.create({});
-
-//https://www.youtube.com/watch?v=ZG6GngLP3qo&list=PLQWFhX-gwJbluCKdCPVYnfwVJlBDVf9E-&index=2
-//https://www.youtube.com/watch?v=6LGWYRcDLwY
+          </Stack>
+  )
+}

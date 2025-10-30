@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Dimensions,
   FlatList,
-  TouchableOpacity
+  TouchableOpacity,
+  RefreshControl
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -27,6 +28,7 @@ import InputBox from "../../../component/input/Input";
 import SelectBox from "../../../component/select/SelectBox";
 import { Redirect, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { getMyCart } from "../../../redux/slices/cartSlice";
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
 import _data from "../home/data";
@@ -35,31 +37,52 @@ import { i18n } from "../../../utils/libs/localization/Localization";
 
 export default function index() {
   const dispatch = useDispatch();
-  const _language = useSelector((state) => state.loginReducer.language);
+  const _language = useSelector((state) => state.loginReducer.language) || 0 ;
   const _mydata = useSelector((state) => state.cartReducer.data);
   const compare = useSelector((state) => state.cartReducer.compare);
-  const warehouse = useSelector((state) => state.productReducer.warehouse);
+  const [warehouse,setWarehouse] = useState([]) //useSelector((state) => state.productReducer.warehouse);
   const [data, setData] = useState(useSelector((state) => state.cartReducer.data)); //useState(_data);//useState(_data); //
   const [myData, setMyData] = useState([]);
   const [total, setTotal] = useState(0.0);
   const [thisWarehouse,setThisWarehouse] = useState("")
+  const [refreshing, setRefreshing] = useState(false);
 
   i18n.locale = getLocales()[_language]?.languageCode;
 
-  useEffect(() => {
-    const option = {
-      txt: "",
-      doctype: "Warehouse",
-      ignore_user_permissions: 0,
-      reference_doctype: "Sales Order",
-      page_length: 10,
-      filters: {
-        is_group: ["=", 0],
-      },
-    };
+  console.log("=========++================="+JSON.stringify(_mydata))
 
-    dispatch(getWareHouse(option))
+  const onRefresh = async () => {
+    setRefreshing(true);
+    makeTheCall();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+
+   makeTheCall()
   }, []);
+
+  const makeTheCall = () =>{
+    dispatch(getWareHouse()).then(function(e){
+      setWarehouse(makeMyWarehouseCompitable(e.payload.message.warehouses))
+      })
+
+      dispatch(getMyCart()).then(function(e){
+        setData(e.payload.message)
+      })
+  }
+
+  function  makeMyWarehouseCompitable(data){
+    let arr = [];
+    data.map((data, index) =>
+      arr.push({
+        name : data.warehouse,
+        value : data.warehouse
+      }),
+    );
+    return arr;
+  }
+
 
   useEffect(() => {
     _mydata?.map((__data, index) => {
@@ -85,7 +108,6 @@ export default function index() {
     });
     setTotal(total);
 
-    // setData();
   }, [data]);
 
   const _deleteItem = (action) => {
@@ -219,9 +241,11 @@ export default function index() {
   };
 
   const selectedValue = (val) =>{
+    // console.log(val)
     setThisWarehouse(val)
     dispatch(storeWareHouse(val))
   }
+
 
 
   return (
@@ -246,6 +270,21 @@ export default function index() {
         <FlatList
           removeClippedSubviews={false}
           ListEmptyComponent={renderNoStateMessage}
+        //       ListHeaderComponent = {() => (
+        //     //  <Text style={styles.text}>{i18n.t('Active')} {i18n.t('Orders')}</Text>
+        //     <Card variant="ghost" style={{
+
+        //     }}>
+        //       <SelectBox 
+        //       // borderColor={"#FFC0CB"}
+        //       height={(height*5)/100}
+        //       placeholder ="Select WareHouse"
+        //       data={warehouse}
+        //       selectedValue ={selectedValue}
+        //       defaultValue={thisWarehouse}
+        //       />
+        //     </Card>
+        //  )}
           data={data || _data}
           renderItem={({ item }) => (
             <Card variant="ghost" style={styles.mycart}>
@@ -274,7 +313,7 @@ export default function index() {
                       <Text size="md" style={styles.spacing} bold>
                         {item?.name}
                       </Text>
-                      <Text size="xs">{item?.capacity}</Text>
+                      <Text size="xs">{item?.capacity} ({item?.productType})</Text>
                       <Text size="lg" color="green" bold>
                         Tk:{item?.after_discount}
                       </Text>
@@ -340,6 +379,9 @@ export default function index() {
             </Card>
           )}
           keyExtractor={(item) => item?.id}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
           ListFooterComponent={() => <Text></Text>}
         />
       </View>
@@ -361,16 +403,7 @@ export default function index() {
               {i18n.t("Total")} :
             </Text>
             <Text>Tk {total}</Text>
-            {/* <View>
-              <ButtonBox
-                action="negative"
-                text={i18n.t("Proceed")}
-                width={(width * 35) / 100}
-                borderRadius={10}
-                onClick={confirmedCalled}
-                fontColor={"#fff"}
-              />
-            </View> */}
+           
           </View>
           <View
             style={{
@@ -457,7 +490,7 @@ const styles = StyleSheet.create({
     // backgroundColor : 'red',
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "40%",
+    width: "30%",
   },
   rightSide: {
     flexDirection: "column",

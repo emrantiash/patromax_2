@@ -13,11 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
-      "**/*"
+      "assets/**/*"
     ],
     "ios": {
       "buildNumber": "2",
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.anonymous.patromax-2"
     },
     "android": {
@@ -34,6 +34,15 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "ios": ["en", "bn"],
+            "android": ["en", "bn"]
+          }
+        }
+      ],
       [
       "expo-build-properties",
       {

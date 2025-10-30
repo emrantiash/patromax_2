@@ -88,7 +88,7 @@ export default function LoginScreen() {
       handleToast("Please Fill OTP Field");
     } else {
       setIsLoading(true);
-      dispatch(setLanguage(0));
+      dispatch(setLanguage(1));
       // dispatch(setLanguageName("English"))
       const option = {
         challenge_id: _id,

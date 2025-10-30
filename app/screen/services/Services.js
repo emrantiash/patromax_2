@@ -1,13 +1,18 @@
 import { ScrollView, View, StyleSheet,Platform } from "react-native";
+import { useSelector } from "react-redux";
 import React from "react";
 import { Text, Card } from "@gluestack-ui/themed";
+import { i18n } from "../../utils/libs/localization/Localization";
+import { getLocales } from "expo-localization";
 
 export default function Services() {
+  const _language = useSelector((state) => state.loginReducer.language);
+  i18n.locale = getLocales()[_language]?.languageCode;
   return (
     <View style={styles.container}>
       <View style={styles.title}>
         <Text size="md" style={styles.shrink}>
-        By using the Petromax Dealer App, you agree that:
+        {i18n.t("service_head")}:
 
         </Text>
       </View>
@@ -22,58 +27,58 @@ export default function Services() {
             marginHorizontal: 15,
           }}
         >
-          We use this information to :
+          {i18n.t("service_discuss")} :
         </Text>
       </View>
       <View style={styles.body}>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Only authorized dealers & staff can use the app
+          {i18n.t("service_1")}
 
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          You will not share your account or give false info
+          {i18n.t("service_2")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Minimum order 1 item, and all orders are binding
+          {i18n.t("service_3")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          You won’t use the app for illegal purposes
+          {i18n.t("service_4")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          You won’t use the app for illegal purposes
+          {i18n.t("service_6_1")}
           </Text>
         </View>
-        <View style={styles.bodyPart}>
+        {/* <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
           We’re not responsible for losses due to misuse 
 
           </Text>
-        </View>
+        </View> */}
         <View style={styles.bodyPart}>
               {/* <Text style={styles.dot}> </Text> */}
           <Text size="md" style={{marginLeft : 10 }}>
-          or technical issues
+          {i18n.t("service_6_2")}
           </Text>
         </View>
         <View style={styles.bodyPart}>
           <Text style={styles.dot}> </Text>
           <Text size="md" style={styles.shrink}>
-          Governed by Bangladesh law
+          {i18n.t("service_7")}
 
           </Text>
         </View>
